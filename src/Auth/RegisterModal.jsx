@@ -16,44 +16,34 @@ export default function RegisterModal({ open, onClose, onLoginClick }) {
     e.preventDefault();
     setLoading(true);
 
-    const formData = new FormData(e.target);
-
     const payload = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      password: formData.get("password"),
-      phoneNumber: formData.get("phoneNumber"),
+      name: e.target.name.value.trim(),
+      email: e.target.email.value.trim(),
+      password: e.target.password.value,
+      phoneNumber: e.target.phoneNumber.value || null,
     };
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/auth/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+      const res = await fetch("/api/v1/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(payload),
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Registration failed");
+        throw new Error(data.error || "Registration failed");
       }
 
-      // ✅ SUCCESS TOAST
-      toast.success("Registration successful! Please login.");
-
-      // ✅ Close register modal
+      toast.success("Registration successful!");
       onClose();
-
-      // ✅ Open login modal after short delay
-      setTimeout(() => {
-        onLoginClick();
-      }, 800);
+      setTimeout(onLoginClick, 800);
     } catch (err) {
-      console.error(err);
-      toast.error(err.message || "Something went wrong");
+      console.error("Register Error:", err);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
