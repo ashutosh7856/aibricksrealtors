@@ -1,58 +1,3 @@
-// "use client";
-
-// import Image from "next/image";
-// import { motion } from "framer-motion";
-// import { ArrowRight } from "lucide-react";
-
-// export default function Cta() {
-//   return (
-//     <section className="relative h-[70vh] w-full flex items-center justify-center text-center overflow-hidden">
-//       {/* Background image */}
-//       <Image
-//         src="/home/cta-banner-3.jpg"
-//         alt="Wolves Background"
-//         fill
-//         priority
-//         className="object-cover brightness-[0.55]"
-//       />
-
-//       {/* Overlay content */}
-//       <div className="relative z-10 max-w-4xl px-4 sm:px-6 md:px-10 text-white flex flex-col items-center">
-//         <motion.p
-//           initial={{ opacity: 0, y: 20 }}
-//           animate={{ opacity: 1, y: 0 }}
-//           transition={{ duration: 0.8 }}
-//           className="text-xl sm:text-xl md:text-2xl mb-4 tracking-wide"
-//         >
-//           Live The Future
-//         </motion.p>
-
-//         <motion.h1
-//           initial={{ opacity: 0, scale: 0.9 }}
-//           animate={{ opacity: 1, scale: 1 }}
-//           transition={{ duration: 1 }}
-//           className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-serif tracking-widest mb-8"
-//         >
-//           AI BRICKS
-//         </motion.h1>
-
-//         <motion.a
-//           href="#"
-//           whileHover={{ scale: 1.05 }}
-//           whileTap={{ scale: 0.97 }}
-//           className="inline-flex items-center justify-center gap-2 bg-[var(--color-brickred)] text-[var(--color-lightcream)] font-semibold px-6 sm:px-10 py-3 sm:py-4 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:bg-[var(--color-ochre)]"
-//         >
-//           Hunt For Properties
-//           <ArrowRight size={18} />
-//         </motion.a>
-//       </div>
-
-//       {/* Optional gradient overlay for readability */}
-//       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-transparent"></div>
-//     </section>
-//   );
-// }
-
 "use client";
 
 import { useState } from "react";
@@ -63,32 +8,40 @@ import { ArrowRight, X } from "lucide-react";
 export default function Cta() {
   const [open, setOpen] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const INITIAL_FORM = {
     name: "",
     email: "",
     phone: "",
     message: "",
-  });
+  };
 
+  const [formData, setFormData] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   // 🔹 Input change handler
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Allow only numbers in phone field
-    if (name === "phone" && !/^\d*$/.test(value)) return;
+    if (name === "phone") {
+      const numericValue = value.replace(/\D/g, "");
+      if (numericValue.length > 10) return;
+      setFormData({ ...formData, phone: numericValue });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
 
-    setFormData({ ...formData, [name]: value });
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
   };
 
-  // 🔹 Validation
+  // 🔹 Validation (same standard as Contact page)
   const validate = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
+    if (!formData.name.trim()) newErrors.name = "Name is required";
 
     if (!formData.email) {
       newErrors.email = "Email is required";
@@ -96,33 +49,53 @@ export default function Cta() {
       newErrors.email = "Enter a valid email address";
     }
 
-    if (!formData.phone) {
-      newErrors.phone = "Phone number is required";
-    } else if (formData.phone.length < 10) {
-      newErrors.phone = "Phone number must be at least 10 digits";
+    if (!/^\d{10}$/.test(formData.phone)) {
+      newErrors.phone = "Phone number must be exactly 10 digits";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // 🔹 Submit
-  const handleSubmit = (e) => {
+  // 🔹 Submit (same API as Contact page)
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
-    console.log("Form Data:", formData);
+    setLoading(true);
+    setSuccess(false);
 
-    // Reset (optional)
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      message: "",
-    });
-    setErrors({});
-    setOpen(false);
+    try {
+      const res = await fetch("/api/v1/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: formData.name.split(" ")[0] || formData.name,
+          lastName: formData.name.split(" ").slice(1).join(" ") || "",
+          email: formData.email,
+          phone: formData.phone,
+          message: formData.message,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to submit enquiry");
+      }
+
+      setSuccess(true);
+      setFormData(INITIAL_FORM);
+
+      setTimeout(() => {
+        setSuccess(false);
+        setOpen(false);
+      }, 2500);
+    } catch (err) {
+      setErrors({ submit: err.message || "Something went wrong" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -266,11 +239,22 @@ export default function Cta() {
                   className="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-[var(--color-brickred)]"
                 />
 
+                {errors.submit && (
+                  <p className="text-sm text-red-500">{errors.submit}</p>
+                )}
+
+                {success && (
+                  <p className="text-sm text-green-600">
+                    Thanks! We’ll contact you shortly.
+                  </p>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full bg-[var(--color-brickred)] text-white py-3 rounded-xl font-semibold hover:bg-[var(--color-ochre)] transition"
+                  disabled={loading}
+                  className="w-full bg-[var(--color-brickred)] text-white py-3 rounded-xl font-semibold hover:bg-[var(--color-ochre)] transition disabled:opacity-50"
                 >
-                  Submit Enquiry
+                  {loading ? "Submitting..." : "Submit Enquiry"}
                 </button>
               </form>
             </motion.div>

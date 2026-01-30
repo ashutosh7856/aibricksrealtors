@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Navbar from "@/src/Home/Navbar";
 import Footer from "@/src/Footer";
 import ClientLayout from "@/src/ClientLayout";
-import ContactModal from "@/src/Modal/ContactModal";
+// import ContactModal from "@/src/Modal/ContactModal";
 import AuthModalController from "@/src/Auth/AuthModalController";
 
 export default function ConditionalLayout({ children }) {
@@ -23,9 +23,8 @@ export default function ConditionalLayout({ children }) {
       <Navbar onLoginClick={() => authModalRef.current?.openLogin()} />
       <AuthModalController ref={authModalRef} />
       {children}
-      <ContactModal />
+      {/* <ContactModal /> */}
       <Footer />
     </ClientLayout>
   );
 }
-

@@ -63,19 +63,43 @@ export default function BookSiteVisitCard() {
 
   /* ---------------- SEARCH API ---------------- */
 
+  // async function getProperties() {
+  //   try {
+  //     let url;
+
+  //     //  Prefer public API URL if available
+  //     if (process.env.NEXT_PUBLIC_API_URL) {
+  //       url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/properties`;
+  //     } else {
+  //       //  Client-safe fallback (relative URL)
+  //       url = `/api/v1/properties`;
+  //     }
+
+  //     const res = await fetch(url, {
+  //       method: "GET",
+  //       cache: "no-store",
+  //     });
+
+  //     if (!res.ok) {
+  //       throw new Error(`API failed with status ${res.status}`);
+  //     }
+
+  //     const text = await res.text();
+
+  //     // Prevent JSON crash
+  //     if (!text || text.startsWith("<")) {
+  //       throw new Error("Invalid JSON response");
+  //     }
+
+  //     return JSON.parse(text);
+  //   } catch (error) {
+  //     console.error("Error fetching properties:", error);
+  //     return null; //  client should not throw
+  //   }
+  // }
   async function getProperties() {
     try {
-      let url;
-
-      //  Prefer public API URL if available
-      if (process.env.NEXT_PUBLIC_API_URL) {
-        url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/properties`;
-      } else {
-        //  Client-safe fallback (relative URL)
-        url = `/api/v1/properties`;
-      }
-
-      const res = await fetch(url, {
+      const res = await fetch("/api/v1/properties", {
         method: "GET",
         cache: "no-store",
       });
@@ -84,17 +108,10 @@ export default function BookSiteVisitCard() {
         throw new Error(`API failed with status ${res.status}`);
       }
 
-      const text = await res.text();
-
-      // Prevent JSON crash
-      if (!text || text.startsWith("<")) {
-        throw new Error("Invalid JSON response");
-      }
-
-      return JSON.parse(text);
+      return await res.json();
     } catch (error) {
       console.error("Error fetching properties:", error);
-      return null; //  client should not throw
+      return null;
     }
   }
 

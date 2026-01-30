@@ -36,20 +36,17 @@ export default function Dashboard() {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/profile`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            name: user.name,
-            phoneNumber: user.phoneNumber,
-          }),
+      const res = await fetch(`/api/v1/user/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      );
+        body: JSON.stringify({
+          name: user.name,
+          phoneNumber: user.phoneNumber,
+        }),
+      });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);

@@ -4,46 +4,62 @@ import HeroSection from "@/src/Properties/HeroSection";
 import PropertyCard from "@/src/Properties/PropertyCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { headers } from "next/headers";
 
 const ITEMS_PER_PAGE = 10;
 
 // async function getProperties() {
-//   const res = await fetch(
-//     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/properties`,
-//     { cache: "no-store" }
-//   );
+//   try {
+//     // For server-side, construct absolute URL
+//     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+//     let url;
 
-//   if (!res.ok) {
-//     throw new Error("Failed to fetch properties");
+//     if (apiUrl) {
+//       url = `${apiUrl}/api/v1/properties`;
+//     } else {
+//       // Fallback: use localhost for development or construct from request
+//       // In Next.js server components, we can use relative URLs for internal routes
+//       url = `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/v1/properties`;
+//     }
+
+//     const res = await fetch(url, { cache: "no-store" });
+
+//     if (!res.ok) {
+//       throw new Error("API response not OK");
+//     }
+
+//     return await res.json();
+//   } catch (error) {
+//     console.error("Error fetching properties:", error);
+//     // This will trigger error.jsx
+//     throw new Error("Failed to load properties");
 //   }
-
-//   return res.json();
 // }
 
 async function getProperties() {
   try {
-    // For server-side, construct absolute URL
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    let url;
+    const headersList = headers();
 
-    if (apiUrl) {
-      url = `${apiUrl}/api/v1/properties`;
-    } else {
-      // Fallback: use localhost for development or construct from request
-      // In Next.js server components, we can use relative URLs for internal routes
-      url = `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/v1/properties`;
+    const host = headersList.get("x-forwarded-host") || headersList.get("host");
+
+    const protocol = headersList.get("x-forwarded-proto") || "https";
+
+    if (!host) {
+      throw new Error("Host header is missing");
     }
 
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(`${protocol}://${host}/api/v1/properties`, {
+      cache: "no-store",
+    });
 
     if (!res.ok) {
+      console.error("API error:", res.status);
       throw new Error("API response not OK");
     }
 
-    return await res.json();
+    return res.json();
   } catch (error) {
     console.error("Error fetching properties:", error);
-    // This will trigger error.jsx
     throw new Error("Failed to load properties");
   }
 }

@@ -52,7 +52,7 @@ export default function SearchClient() {
         setError(false);
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1/properties/search?${searchParams.toString()}`,
+          `/api/v1/properties/search?${searchParams.toString()}`,
         );
 
         if (!res.ok) throw new Error("Failed to fetch");
