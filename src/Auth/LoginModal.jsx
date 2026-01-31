@@ -29,7 +29,8 @@ export default function LoginModal({ open, onClose, onRegisterClick }) {
     };
 
     try {
-      const res = await fetch("/api/v1/auth/login", {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "/api";
+      const res = await fetch(`${apiBase}/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
