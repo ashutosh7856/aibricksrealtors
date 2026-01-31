@@ -36,8 +36,8 @@ export default function Dashboard() {
     setLoading(true);
 
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "/api";
-      const res = await fetch(`${apiBase}/v1/user/profile`, {
+      // const apiBase = process.env.NEXT_PUBLIC_API_URL || "/api";
+      const res = await fetch(`/api/v1/user/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
