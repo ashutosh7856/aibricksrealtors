@@ -267,8 +267,9 @@ import { MapPin, Bed, Ruler, Calendar, Building2, Flame } from "lucide-react";
 import PropertyEnquiryModal from "../Modal/PropertyEnquiryModal";
 
 /* ---------------- CONSTANTS ---------------- */
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
-const API_URL = `${API_BASE_URL}/v1/properties?activeStatus=Yes&limit=9`;
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+// const API_URL = `${API_BASE_URL}/v1/properties?activeStatus=Yes&limit=9`;
+const API_URL = "/api/v1/properties?activeStatus=Yes&limit=9";
 const FALLBACK_IMAGE = "/home/ajman.webp";
 
 /* ---------------- CARD COMPONENT ---------------- */
