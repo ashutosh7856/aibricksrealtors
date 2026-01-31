@@ -24,8 +24,8 @@ export default function RegisterModal({ open, onClose, onLoginClick }) {
     };
 
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "/api";
-      const res = await fetch(`${apiBase}/v1/auth/register`, {
+      // const apiBase = process.env.NEXT_PUBLIC_API_URL || "/api";
+      const res = await fetch(`/api/v1/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
