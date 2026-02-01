@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 ai-bricks-484018-faf4b394daad.json
+serviceAccountKey.json
