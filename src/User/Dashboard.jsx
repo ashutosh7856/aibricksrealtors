@@ -1,11 +1,74 @@
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import {
+//   User,
+//   Phone,
+//   Mail,
+//   Save,
+//   Home,
+//   CalendarCheck,
+//   Building2,
+// } from "lucide-react";
+// import toast from "react-hot-toast";
+
+// export default function Dashboard() {
+//   const [loading, setLoading] = useState(false);
+//   const [user, setUser] = useState({
+//     name: "",
+//     email: "",
+//     phoneNumber: "",
+//   });
+
+//   useEffect(() => {
+//     const stored = JSON.parse(localStorage.getItem("user"));
+//     if (stored) {
+//       setUser({
+//         name: stored.name || "",
+//         email: stored.email || "",
+//         phoneNumber: stored.phoneNumber || "",
+//       });
+//     }
+//   }, []);
+
+//   const handleUpdate = async (e) => {
+//     e.preventDefault();
+//     setLoading(true);
+
+//     try {
+//       // const apiBase = process.env.NEXT_PUBLIC_API_URL || "/api";
+//       const res = await fetch(`/api/v1/auth/profile`, {
+//         method: "PUT",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${localStorage.getItem("token")}`,
+//         },
+//         body: JSON.stringify({
+//           name: user.name,
+//           phoneNumber: user.phoneNumber,
+//         }),
+//       });
+
+//       const data = await res.json();
+//       if (!res.ok) throw new Error(data.error);
+
+//       toast.success("Profile updated successfully");
+
+//       localStorage.setItem("user", JSON.stringify({ ...user }));
+//     } catch (err) {
+//       toast.error(err.message || "Update failed");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   User,
   Phone,
   Mail,
-  Save,
   Home,
   CalendarCheck,
   Building2,
@@ -13,7 +76,8 @@ import {
 import toast from "react-hot-toast";
 
 export default function Dashboard() {
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -21,15 +85,28 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("user"));
-    if (stored) {
-      setUser({
-        name: stored.name || "",
-        email: stored.email || "",
-        phoneNumber: stored.phoneNumber || "",
-      });
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+
+    // 🚨 Not logged in → redirect
+    if (!token || !storedUser) {
+      router.replace("/");
+      return;
     }
-  }, []);
+
+    // ✅ Logged in
+    const parsedUser = JSON.parse(storedUser);
+    setUser({
+      name: parsedUser.name || "",
+      email: parsedUser.email || "",
+      phoneNumber: parsedUser.phoneNumber || "",
+    });
+
+    setLoading(false);
+  }, [router]);
+
+  // ⏳ Prevent UI flash
+  if (loading) return null;
 
   const handleUpdate = async (e) => {
     e.preventDefault();
