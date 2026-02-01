@@ -1,13 +1,13 @@
-// /**
-//  * Admin API Utility Functions
-//  * Handles all API calls for the admin panel
-//  * Uses absolute URLs for API routes
-//  */
+/**
+ * Admin API Utility Functions
+ * Handles all API calls for the admin panel
+ * Uses absolute URLs for API routes
+ */
 
-// /**
-//  * Get API base URL dynamically
-//  * Uses environment variable or defaults to current origin
-//  */
+/**
+ * Get API base URL dynamically
+ * Uses environment variable or defaults to current origin
+ */
 // const getApiBaseUrl = () => {
 //   // Check for environment variable first (for production/external API)
 //   if (typeof window !== "undefined") {
@@ -23,245 +23,20 @@
 //   return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 // };
 
-// /**
-//  * Get auth token from localStorage
-//  */
-// const getToken = () => {
-//   if (typeof window !== "undefined") {
-//     return localStorage.getItem("admin_token");
-//   }
-//   return null;
-// };
-
-// /**
-//  * Set auth token in localStorage
-//  */
-// const setToken = (token) => {
-//   if (typeof window !== "undefined") {
-//     localStorage.setItem("admin_token", token);
-//   }
-// };
-
-// /**
-//  * Remove auth token from localStorage
-//  */
-// const removeToken = () => {
-//   if (typeof window !== "undefined") {
-//     localStorage.removeItem("admin_token");
-//   }
-// };
-
-// /**
-//  * Make API request with authentication
-//  */
-// const apiRequest = async (endpoint, options = {}) => {
-//   const token = getToken();
-//   // Get base URL dynamically to ensure absolute URL
-//   const baseUrl = getApiBaseUrl();
-//   const url = `${baseUrl}${endpoint}`;
-
-//   const config = {
-//     ...options,
-//     headers: {
-//       "Content-Type": "application/json",
-//       ...(token && { Authorization: `Bearer ${token}` }),
-//       ...options.headers,
-//     },
-//   };
-
-//   try {
-//     const response = await fetch(url, config);
-
-//     // Check if response has content before parsing JSON
-//     const contentType = response.headers.get("content-type");
-//     let data;
-
-//     if (contentType && contentType.includes("application/json")) {
-//       const text = await response.text();
-//       try {
-//         data = text ? JSON.parse(text) : {};
-//       } catch (parseError) {
-//         console.error("JSON parse error:", parseError, "Response text:", text);
-//         throw new Error("Invalid JSON response from server");
-//       }
-//     } else {
-//       data = {};
-//     }
-
-//     if (!response.ok) {
-//       if (response.status === 401) {
-//         // Unauthorized - remove token and redirect to login
-//         removeToken();
-//         if (typeof window !== "undefined") {
-//           window.location.href = "/admin/login";
-//         }
-//       }
-//       throw new Error(data.error || data.message || "Request failed");
-//     }
-
-//     return data;
-//   } catch (error) {
-//     console.error("API request error:", {
-//       url,
-//       error: error.message,
-//       stack: error.stack,
-//     });
-//     throw error;
-//   }
-// };
-
-// // Authentication APIs
-// export const authAPI = {
-//   login: async (email, password) => {
-//     const response = await apiRequest("/v1/auth/login", {
-//       method: "POST",
-//       body: JSON.stringify({ email, password }),
-//     });
-
-//     if (response.success && response.data?.token) {
-//       setToken(response.data.token);
-//     }
-
-//     return response;
-//   },
-
-//   logout: () => {
-//     removeToken();
-//   },
-
-//   getCurrentUser: async () => {
-//     return await apiRequest("/v1/auth/me");
-//   },
-// };
-
-// // Properties APIs
-// export const propertiesAPI = {
-//   getAll: async (params = {}) => {
-//     const queryString = new URLSearchParams(params).toString();
-//     return await apiRequest(`/v1/properties?${queryString}`);
-//   },
-
-//   getById: async (id) => {
-//     return await apiRequest(`/v1/properties/${id}`);
-//   },
-
-//   create: async (propertyData) => {
-//     return await apiRequest("/v1/properties", {
-//       method: "POST",
-//       body: JSON.stringify(propertyData),
-//     });
-//   },
-
-//   update: async (id, propertyData) => {
-//     return await apiRequest(`/v1/properties/${id}`, {
-//       method: "PUT",
-//       body: JSON.stringify(propertyData),
-//     });
-//   },
-
-//   delete: async (id) => {
-//     return await apiRequest(`/v1/properties/${id}`, {
-//       method: "DELETE",
-//     });
-//   },
-// };
-
-// // Contact APIs
-// export const contactAPI = {
-//   getAll: async (params = {}) => {
-//     const queryString = new URLSearchParams(params).toString();
-//     return await apiRequest(`/v1/contact?${queryString}`);
-//   },
-
-//   getById: async (id) => {
-//     return await apiRequest(`/v1/contact/${id}`);
-//   },
-// };
-
-// // Schedule Visit APIs
-// export const scheduleVisitAPI = {
-//   getAll: async (params = {}) => {
-//     const queryString = new URLSearchParams(params).toString();
-//     return await apiRequest(`/v1/schedule-visit?${queryString}`);
-//   },
-
-//   getById: async (id) => {
-//     return await apiRequest(`/v1/schedule-visit/${id}`);
-//   },
-
-//   getByProperty: async (propertyId) => {
-//     return await apiRequest(`/v1/schedule-visit/property/${propertyId}`);
-//   },
-// };
-
-// // Interested APIs
-// export const interestedAPI = {
-//   getAll: async (params = {}) => {
-//     const queryString = new URLSearchParams(params).toString();
-//     return await apiRequest(`/v1/interested?${queryString}`);
-//   },
-
-//   getById: async (id) => {
-//     return await apiRequest(`/v1/interested/${id}`);
-//   },
-// };
-
-// // Call Requests APIs
-// export const callRequestsAPI = {
-//   getAll: async (params = {}) => {
-//     const queryString = new URLSearchParams(params).toString();
-//     return await apiRequest(`/v1/call-request?${queryString}`);
-//   },
-
-//   updateStatus: async (id, status) => {
-//     return await apiRequest(`/v1/call-request/${id}`, {
-//       method: "PATCH",
-//       body: JSON.stringify({ status }),
-//     });
-//   },
-// };
-
-// // Health check
-// export const healthAPI = {
-//   check: async () => {
-//     return await apiRequest("/health");
-//   },
-// };
-
-/**
- * Admin API Utility Functions
- * Handles all API calls for the admin panel
- * FIXED: Correct API base URL, no double slashes, production-safe
- */
-
-/**
- * Get API base URL (always points to /api)
- */
 const getApiBaseUrl = () => {
-  // If env variable exists (production / external API)
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
   }
 
-  // Browser-side (same-origin)
   if (typeof window !== "undefined") {
     return `${window.location.origin}/api`;
   }
 
-  // Server-side fallback
   return "http://localhost:3000/api";
 };
 
 /**
- * Normalize endpoint (prevents double slashes)
- */
-const normalizeEndpoint = (endpoint) => {
-  if (!endpoint.startsWith("/")) return `/${endpoint}`;
-  return endpoint;
-};
-
-/**
- * Get auth token
+ * Get auth token from localStorage
  */
 const getToken = () => {
   if (typeof window !== "undefined") {
@@ -271,7 +46,7 @@ const getToken = () => {
 };
 
 /**
- * Set auth token
+ * Set auth token in localStorage
  */
 const setToken = (token) => {
   if (typeof window !== "undefined") {
@@ -280,7 +55,7 @@ const setToken = (token) => {
 };
 
 /**
- * Remove auth token
+ * Remove auth token from localStorage
  */
 const removeToken = () => {
   if (typeof window !== "undefined") {
@@ -289,36 +64,45 @@ const removeToken = () => {
 };
 
 /**
- * Core API request handler
+ * Make API request with authentication
  */
 const apiRequest = async (endpoint, options = {}) => {
   const token = getToken();
+  // Get base URL dynamically to ensure absolute URL
   const baseUrl = getApiBaseUrl();
-  const url = `${baseUrl}${normalizeEndpoint(endpoint)}`;
+  const url = `${baseUrl}${endpoint}`;
 
   const config = {
-    method: options.method || "GET",
+    ...options,
     headers: {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     },
-    body: options.body,
   };
 
   try {
     const response = await fetch(url, config);
 
+    // Check if response has content before parsing JSON
     const contentType = response.headers.get("content-type");
-    let data = {};
+    let data;
 
     if (contentType && contentType.includes("application/json")) {
       const text = await response.text();
-      data = text ? JSON.parse(text) : {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (parseError) {
+        console.error("JSON parse error:", parseError, "Response text:", text);
+        throw new Error("Invalid JSON response from server");
+      }
+    } else {
+      data = {};
     }
 
     if (!response.ok) {
       if (response.status === 401) {
+        // Unauthorized - remove token and redirect to login
         removeToken();
         if (typeof window !== "undefined") {
           window.location.href = "/admin/login";
@@ -332,13 +116,13 @@ const apiRequest = async (endpoint, options = {}) => {
     console.error("API request error:", {
       url,
       error: error.message,
+      stack: error.stack,
     });
     throw error;
   }
 };
 
-/* ===================== AUTH APIs ===================== */
-
+// Authentication APIs
 export const authAPI = {
   login: async (email, password) => {
     const response = await apiRequest("/v1/auth/login", {
@@ -362,29 +146,28 @@ export const authAPI = {
   },
 };
 
-/* ===================== PROPERTIES ===================== */
-
+// Properties APIs
 export const propertiesAPI = {
   getAll: async (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return await apiRequest(`/v1/properties?${query}`);
+    const queryString = new URLSearchParams(params).toString();
+    return await apiRequest(`/v1/properties?${queryString}`);
   },
 
   getById: async (id) => {
     return await apiRequest(`/v1/properties/${id}`);
   },
 
-  create: async (data) => {
+  create: async (propertyData) => {
     return await apiRequest("/v1/properties", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify(propertyData),
     });
   },
 
-  update: async (id, data) => {
+  update: async (id, propertyData) => {
     return await apiRequest(`/v1/properties/${id}`, {
       method: "PUT",
-      body: JSON.stringify(data),
+      body: JSON.stringify(propertyData),
     });
   },
 
@@ -395,12 +178,11 @@ export const propertiesAPI = {
   },
 };
 
-/* ===================== CONTACT ===================== */
-
+// Contact APIs
 export const contactAPI = {
   getAll: async (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return await apiRequest(`/v1/contact?${query}`);
+    const queryString = new URLSearchParams(params).toString();
+    return await apiRequest(`/v1/contact?${queryString}`);
   },
 
   getById: async (id) => {
@@ -408,12 +190,11 @@ export const contactAPI = {
   },
 };
 
-/* ===================== SCHEDULE VISIT ===================== */
-
+// Schedule Visit APIs
 export const scheduleVisitAPI = {
   getAll: async (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return await apiRequest(`/v1/schedule-visit?${query}`);
+    const queryString = new URLSearchParams(params).toString();
+    return await apiRequest(`/v1/schedule-visit?${queryString}`);
   },
 
   getById: async (id) => {
@@ -425,12 +206,11 @@ export const scheduleVisitAPI = {
   },
 };
 
-/* ===================== INTERESTED ===================== */
-
+// Interested APIs
 export const interestedAPI = {
   getAll: async (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return await apiRequest(`/v1/interested?${query}`);
+    const queryString = new URLSearchParams(params).toString();
+    return await apiRequest(`/v1/interested?${queryString}`);
   },
 
   getById: async (id) => {
@@ -438,12 +218,11 @@ export const interestedAPI = {
   },
 };
 
-/* ===================== CALL REQUESTS ===================== */
-
+// Call Requests APIs
 export const callRequestsAPI = {
   getAll: async (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    return await apiRequest(`/v1/call-request?${query}`);
+    const queryString = new URLSearchParams(params).toString();
+    return await apiRequest(`/v1/call-request?${queryString}`);
   },
 
   updateStatus: async (id, status) => {
@@ -454,8 +233,7 @@ export const callRequestsAPI = {
   },
 };
 
-/* ===================== HEALTH ===================== */
-
+// Health check
 export const healthAPI = {
   check: async () => {
     return await apiRequest("/health");
