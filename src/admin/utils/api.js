@@ -8,31 +8,19 @@
  * Get API base URL dynamically
  * Uses environment variable or defaults to current origin
  */
-// const getApiBaseUrl = () => {
-//   // Check for environment variable first (for production/external API)
-//   if (typeof window !== "undefined") {
-//     // Use environment variable if set
-//     if (process.env.NEXT_PUBLIC_API_URL) {
-//       return process.env.NEXT_PUBLIC_API_URL;
-//     }
-//     // Default to current origin with /api path
-//     return `${window.location.origin}/api`;
-//   }
-
-//   // Server-side fallback
-//   return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-// };
-
 const getApiBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
-  }
-
+  // Check for environment variable first (for production/external API)
   if (typeof window !== "undefined") {
+    // Use environment variable if set
+    if (process.env.NEXT_PUBLIC_API_URL) {
+      return process.env.NEXT_PUBLIC_API_URL;
+    }
+    // Default to current origin with /api path
     return `${window.location.origin}/api`;
   }
 
-  return "http://localhost:3000/api";
+  // Server-side fallback
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 };
 
 /**
