@@ -10,7 +10,7 @@
  */
 const getApiBaseUrl = () => {
   // Check for environment variable first (for production/external API)
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     // Use environment variable if set
     if (process.env.NEXT_PUBLIC_API_URL) {
       return process.env.NEXT_PUBLIC_API_URL;
@@ -18,17 +18,17 @@ const getApiBaseUrl = () => {
     // Default to current origin with /api path
     return `${window.location.origin}/api`;
   }
-  
+
   // Server-side fallback
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 };
 
 /**
  * Get auth token from localStorage
  */
 const getToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('admin_token');
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("admin_token");
   }
   return null;
 };
@@ -37,8 +37,8 @@ const getToken = () => {
  * Set auth token in localStorage
  */
 const setToken = (token) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('admin_token', token);
+  if (typeof window !== "undefined") {
+    localStorage.setItem("admin_token", token);
   }
 };
 
@@ -46,8 +46,8 @@ const setToken = (token) => {
  * Remove auth token from localStorage
  */
 const removeToken = () => {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('admin_token');
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("admin_token");
   }
 };
 
@@ -63,7 +63,7 @@ const apiRequest = async (endpoint, options = {}) => {
   const config = {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),
       ...options.headers,
     },
@@ -71,18 +71,18 @@ const apiRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(url, config);
-    
+
     // Check if response has content before parsing JSON
-    const contentType = response.headers.get('content-type');
+    const contentType = response.headers.get("content-type");
     let data;
-    
-    if (contentType && contentType.includes('application/json')) {
+
+    if (contentType && contentType.includes("application/json")) {
       const text = await response.text();
       try {
         data = text ? JSON.parse(text) : {};
       } catch (parseError) {
-        console.error('JSON parse error:', parseError, 'Response text:', text);
-        throw new Error('Invalid JSON response from server');
+        console.error("JSON parse error:", parseError, "Response text:", text);
+        throw new Error("Invalid JSON response from server");
       }
     } else {
       data = {};
@@ -92,19 +92,19 @@ const apiRequest = async (endpoint, options = {}) => {
       if (response.status === 401) {
         // Unauthorized - remove token and redirect to login
         removeToken();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/admin/login';
+        if (typeof window !== "undefined") {
+          window.location.href = "/admin/login";
         }
       }
-      throw new Error(data.error || data.message || 'Request failed');
+      throw new Error(data.error || data.message || "Request failed");
     }
 
     return data;
   } catch (error) {
-    console.error('API request error:', {
+    console.error("API request error:", {
       url,
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
     throw error;
   }
@@ -113,15 +113,15 @@ const apiRequest = async (endpoint, options = {}) => {
 // Authentication APIs
 export const authAPI = {
   login: async (email, password) => {
-    const response = await apiRequest('/v1/auth/login', {
-      method: 'POST',
+    const response = await apiRequest("/v1/auth/login", {
+      method: "POST",
       body: JSON.stringify({ email, password }),
     });
-    
+
     if (response.success && response.data?.token) {
       setToken(response.data.token);
     }
-    
+
     return response;
   },
 
@@ -130,7 +130,7 @@ export const authAPI = {
   },
 
   getCurrentUser: async () => {
-    return await apiRequest('/v1/auth/me');
+    return await apiRequest("/v1/auth/me");
   },
 };
 
@@ -146,22 +146,22 @@ export const propertiesAPI = {
   },
 
   create: async (propertyData) => {
-    return await apiRequest('/v1/properties', {
-      method: 'POST',
+    return await apiRequest("/v1/properties", {
+      method: "POST",
       body: JSON.stringify(propertyData),
     });
   },
 
   update: async (id, propertyData) => {
     return await apiRequest(`/v1/properties/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(propertyData),
     });
   },
 
   delete: async (id) => {
     return await apiRequest(`/v1/properties/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 };
@@ -215,7 +215,7 @@ export const callRequestsAPI = {
 
   updateStatus: async (id, status) => {
     return await apiRequest(`/v1/call-request/${id}`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: JSON.stringify({ status }),
     });
   },
@@ -224,6 +224,6 @@ export const callRequestsAPI = {
 // Health check
 export const healthAPI = {
   check: async () => {
-    return await apiRequest('/health');
+    return await apiRequest("/health");
   },
 };
