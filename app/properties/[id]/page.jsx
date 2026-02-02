@@ -100,12 +100,41 @@ export default function PropertyDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* IMAGE GALLERY */}
           <div className="lg:col-span-2">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2 h-[320px] bg-gray-200 rounded-xl flex items-center justify-center">
-                Main Image
+            <div className="grid grid-cols-2 gap-3 h-[320px] md:h-[400px]">
+              {/* Main Image */}
+              <div className="col-span-2 md:col-span-1 row-span-2 relative rounded-xl overflow-hidden bg-gray-200">
+                 {property.mainPropertyImage ? (
+                    <img 
+                        src={property.mainPropertyImage} 
+                        alt="Main" 
+                        className="w-full h-full object-cover"
+                    />
+                 ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
+                 )}
               </div>
-              <div className="h-[150px] bg-gray-200 rounded-xl" />
-              <div className="h-[150px] bg-gray-200 rounded-xl" />
+              
+              {/* Side Images */}
+              <div className="hidden md:grid grid-rows-2 gap-3 h-full">
+                 <div className="relative rounded-xl overflow-hidden bg-gray-200 h-full">
+                    {property.imageGallery?.[0] && (
+                        <img 
+                            src={property.imageGallery[0]} 
+                            alt="Gallery 1" 
+                            className="w-full h-full object-cover"
+                        />
+                    )}
+                 </div>
+                 <div className="relative rounded-xl overflow-hidden bg-gray-200 h-full">
+                     {property.imageGallery?.[1] && (
+                        <img 
+                            src={property.imageGallery[1]} 
+                            alt="Gallery 2" 
+                            className="w-full h-full object-cover"
+                        />
+                    )}
+                 </div>
+              </div>
             </div>
           </div>
 

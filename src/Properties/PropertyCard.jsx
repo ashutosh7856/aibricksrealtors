@@ -23,7 +23,7 @@ export default function PropertyCard({ property }) {
         <div className="relative w-full sm:w-[260px] h-[180px] rounded-lg overflow-hidden bg-gray-200">
           <Image
             src={
-              property.imageGallery?.[0] || "/home/upcoming/sobha-kharadi.webp"
+              property.mainPropertyImage || property.imageGallery?.[0] || "/home/upcoming/sobha-kharadi.webp"
             }
             alt={property.propertyTitle}
             fill

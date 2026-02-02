@@ -72,10 +72,17 @@ export async function POST(req) {
     const propertyData = {
       ...body,
       userId: authResult.user.id,
-      // Map propertyTitle to title if needed
-      title: body.propertyTitle || body.title,
-      price: body.totalPrice || body.price
     };
+
+    // Map propertyTitle to title if needed
+    if (body.propertyTitle || body.title) {
+        propertyData.title = body.propertyTitle || body.title;
+    }
+    
+    // Map totalPrice to price if needed
+    if (body.totalPrice !== undefined || body.price !== undefined) {
+        propertyData.price = body.totalPrice !== undefined ? body.totalPrice : body.price;
+    }
 
     const property = await propertyModel.create(propertyData);
 

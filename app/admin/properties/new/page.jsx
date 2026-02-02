@@ -130,6 +130,42 @@ export default function NewPropertyPage() {
   const [amenityInput, setAmenityInput] = useState("");
   const [imageUrlInput, setImageUrlInput] = useState("");
   const [floorPlanUrlInput, setFloorPlanUrlInput] = useState("");
+  const [uploading, setUploading] = useState({});
+
+  const handleFileUpload = async (file, fieldName, isArray = false) => {
+    if (!file) return;
+    
+    setUploading(prev => ({ ...prev, [fieldName]: true }));
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("path", "properties");
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      
+      if (data.success) {
+        if (isArray) {
+           setFormData(prev => ({
+             ...prev,
+             [fieldName]: [...prev[fieldName], data.url]
+           }));
+        } else {
+           setFormData(prev => ({
+             ...prev,
+             [fieldName]: data.url
+           }));
+        }
+      } else {
+        alert("Upload failed: " + (data.error || "Unknown error"));
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Upload error");
+    } finally {
+      setUploading(prev => ({ ...prev, [fieldName]: false }));
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -709,53 +745,68 @@ export default function NewPropertyPage() {
         return (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Main Property Image URL</label>
-              <input type="url" name="mainPropertyImage" value={formData.mainPropertyImage} onChange={handleChange} className="admin-input w-full" />
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Main Property Image</label>
+              <div className="flex flex-col gap-2">
+                {formData.mainPropertyImage && (
+                  <img src={formData.mainPropertyImage} alt="Main" className="h-40 w-auto object-cover rounded border" />
+                )}
+                <div className="flex items-center gap-2">
+                    <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload(e.target.files[0], "mainPropertyImage")}
+                        className="admin-input w-full"
+                    />
+                    {uploading["mainPropertyImage"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
+                </div>
+              </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Image Gallery URLs</label>
-              <div className="flex gap-2 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Image Gallery</label>
+              <div className="flex gap-2 mb-2 items-center">
                 <input
-                  type="url"
-                  value={imageUrlInput}
-                  onChange={(e) => setImageUrlInput(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addImageUrl())}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                      if(e.target.files[0]) {
+                          handleFileUpload(e.target.files[0], "imageGallery", true);
+                          e.target.value = null; 
+                      }
+                  }}
                   className="admin-input flex-1"
-                  placeholder="Add image URL"
                 />
-                <button type="button" onClick={addImageUrl} className="admin-btn-primary px-4">
-                  Add
-                </button>
+                 {uploading["imageGallery"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
               </div>
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                 {formData.imageGallery.map((url, idx) => (
-                  <div key={idx} className="flex items-center gap-2 bg-gray-50 p-2 rounded">
-                    <span className="flex-1 text-sm truncate">{url}</span>
-                    <button type="button" onClick={() => removeImageUrl(url)} className="text-red-600 hover:text-red-700">Remove</button>
+                  <div key={idx} className="relative group">
+                    <img src={url} alt={`Gallery ${idx}`} className="h-24 w-full object-cover rounded border" />
+                    <button type="button" onClick={() => removeImageUrl(url)} className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">×</button>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Floor Plan Image URLs</label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="url"
-                  value={floorPlanUrlInput}
-                  onChange={(e) => setFloorPlanUrlInput(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addFloorPlanUrl())}
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Floor Plan Images</label>
+              <div className="flex gap-2 mb-2 items-center">
+                 <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                      if(e.target.files[0]) {
+                          handleFileUpload(e.target.files[0], "floorPlanImages", true);
+                          e.target.value = null;
+                      }
+                  }}
                   className="admin-input flex-1"
-                  placeholder="Add floor plan URL"
                 />
-                <button type="button" onClick={addFloorPlanUrl} className="admin-btn-primary px-4">
-                  Add
-                </button>
+                {uploading["floorPlanImages"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
               </div>
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                 {formData.floorPlanImages.map((url, idx) => (
-                  <div key={idx} className="flex items-center gap-2 bg-gray-50 p-2 rounded">
-                    <span className="flex-1 text-sm truncate">{url}</span>
-                    <button type="button" onClick={() => removeFloorPlanUrl(url)} className="text-red-600 hover:text-red-700">Remove</button>
+                  <div key={idx} className="relative group">
+                    <img src={url} alt={`Floor Plan ${idx}`} className="h-24 w-full object-cover rounded border" />
+                    <button type="button" onClick={() => removeFloorPlanUrl(url)} className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">×</button>
                   </div>
                 ))}
               </div>
