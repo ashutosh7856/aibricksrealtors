@@ -31,13 +31,16 @@ const TIME_SLOTS = [
   "06:30 PM",
 ];
 
-export default function BookSiteVisitCard() {
+export default function BookSiteVisitCard({ property = null }) {
   const router = useRouter();
   const inputRef = useRef(null);
 
   const [activeTab, setActiveTab] = useState("site");
-  const [searchText, setSearchText] = useState("");
-  const [selectedProperty, setSelectedProperty] = useState(null);
+  // const [searchText, setSearchText] = useState("");
+  // const [selectedProperty, setSelectedProperty] = useState(null);
+  const [searchText, setSearchText] = useState(property?.propertyTitle || "");
+
+  const [selectedProperty, setSelectedProperty] = useState(property || null);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -115,7 +118,17 @@ export default function BookSiteVisitCard() {
     }
   }
 
+  // useEffect(() => {
+  //   if (!searchText.trim()) {
+  //     setSuggestions([]);
+  //     setShowSuggestions(false);
+  //     return;
+  //   }
+
   useEffect(() => {
+    // If property is already fixed (detail page), skip search
+    if (property) return;
+
     if (!searchText.trim()) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -259,13 +272,18 @@ export default function BookSiteVisitCard() {
         </button>
       </div>
       {/* Search */}
+      {property && (
+        <p className="text-xs text-gray-500 mt-1">
+          Booking site visit for <strong>{property.propertyTitle}</strong>
+        </p>
+      )}
       <div className="relative mb-4">
         <Search
           size={18}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
         />
 
-        <input
+        {/* <input
           type="text"
           placeholder="Search projects"
           value={searchText}
@@ -274,6 +292,19 @@ export default function BookSiteVisitCard() {
             setSelectedProperty(null);
           }}
           className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-100 text-sm"
+        /> */}
+        <input
+          type="text"
+          placeholder="Search projects"
+          value={searchText}
+          disabled={!!property}
+          onChange={(e) => {
+            setSearchText(e.target.value);
+            setSelectedProperty(null);
+          }}
+          className={`w-full pl-10 pr-4 py-3 rounded-lg text-sm ${
+            property ? "bg-gray-200 cursor-not-allowed" : "bg-gray-100"
+          }`}
         />
 
         {showSuggestions && suggestions.length > 0 && (

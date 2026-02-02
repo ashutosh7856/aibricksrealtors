@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import ContactSidebar from "@/src/Properties/ContactSidebar";
 import BookSiteVisitCard from "@/src/Properties/BookSiteVisitCard";
+import SellerContactActions from "@/src/Properties/SellerContactActions";
 
 /* ================= AMENITY ICON MAP ================= */
 
@@ -123,7 +124,7 @@ export default function PropertyDetailPage() {
                 ✔ Verified Property <br />✔ Best Price Guaranteed
               </div> */}
               <ContactSidebar property={property} />
-              <BookSiteVisitCard />
+              <BookSiteVisitCard property={property} />
             </div>
           </div>
         </div>
@@ -173,14 +174,20 @@ export default function PropertyDetailPage() {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            {/* <div className="flex gap-3">
               <button className="px-5 py-2 bg-brickred text-white rounded-lg">
                 Call
               </button>
               <button className="px-5 py-2 border border-brickred text-brickred rounded-lg">
                 Email
               </button>
-            </div>
+            </div> */}
+
+            <SellerContactActions
+              phone={property.seller?.phone}
+              email={property.seller?.email}
+              propertyTitle={property.propertyTitle}
+            />
           </div>
         </Section>
       </div>
