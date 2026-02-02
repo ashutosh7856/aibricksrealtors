@@ -29,7 +29,7 @@ const logos = [
 export default function LogoSlider() {
   return (
     <section className="w-full py-12 px-4 flex justify-center items-center mt-[-100px]">
-      <div className="relative w-full max-w-7xl overflow-hidden rounded-3xl border-2 border-[var(--color-brickred)] shadow-lg">
+      <div className="relative w-full max-w-7xl overflow-hidden rounded-3xl border-2 border-brickred shadow-lg">
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-100/50 via-blue-50/30 to-blue-100/50 backdrop-blur-sm rounded-3xl" />
 
@@ -43,9 +43,9 @@ export default function LogoSlider() {
               <Image
                 src={logo.src}
                 alt={logo.alt}
-                width={180}
+                width={200}
                 height={100}
-                className="object-fit w-full h-[80px]"
+                className="object-fit w-full h-[70px]"
               />
             </div>
           ))}

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight } from "lucide-react"; // ✅ Arrow icons
+import CtaModal from "../Modal/CtaModal";
 
 const ProjectSlider = () => {
   // const projects = [
@@ -11,6 +12,8 @@ const ProjectSlider = () => {
   //   { name: "Ajman", image: "/home/ajman.webp" },
   //   { name: "Abu Dhabi", image: "/home/abu-dhabi.webp" },
   // ];
+
+  const [open, setOpen] = useState(false);
 
   const projects = [
     // Pune Projects
@@ -127,13 +130,21 @@ const ProjectSlider = () => {
               alt={project.name}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end justify-center">
-              <h3 className="text-white text-2xl font-semibold mb-6 drop-shadow-lg">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex flex-col items-center justify-end pb-6">
+              <h3 className="text-white text-2xl font-semibold mb-3 drop-shadow-lg text-center">
                 {project.name}
               </h3>
+
+              <button
+                onClick={() => setOpen(true)}
+                className="text-white text-sm font-semibold drop-shadow-lg bg-brickred py-2 px-4 rounded-lg hover:bg-ochre transition"
+              >
+                Get Project Details
+              </button>
             </div>
           </motion.div>
         ))}
+        <CtaModal open={open} onClose={() => setOpen(false)} />
       </div>
 
       {/* Navigation & Pagination */}
