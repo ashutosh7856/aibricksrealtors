@@ -35,6 +35,37 @@ export default function EditPropertyPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  // Suppress browser extension errors (common with React DevTools, etc.)
+  useEffect(() => {
+    const handleError = (event) => {
+      // Suppress known browser extension errors
+      if (event.message && event.message.includes("message channel closed")) {
+        event.preventDefault();
+        return false;
+      }
+      if (event.error && event.error.message && event.error.message.includes("message channel closed")) {
+        event.preventDefault();
+        return false;
+      }
+    };
+
+    const handleUnhandledRejection = (event) => {
+      // Suppress known browser extension promise rejection errors
+      if (event.reason && event.reason.message && event.reason.message.includes("message channel closed")) {
+        event.preventDefault();
+        return false;
+      }
+    };
+
+    window.addEventListener("error", handleError);
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener("error", handleError);
+      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+    };
+  }, []);
   const [formData, setFormData] = useState({
     // Step 1: Basic Info
     propertyTitle: "",
@@ -143,6 +174,11 @@ export default function EditPropertyPage() {
 
     try {
       const res = await fetch("/api/upload", { method: "POST", body: formData });
+      
+      if (!res.ok) {
+        throw new Error(`Upload failed with status: ${res.status}`);
+      }
+      
       const data = await res.json();
       
       if (data.success) {
@@ -162,7 +198,7 @@ export default function EditPropertyPage() {
       }
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Upload error");
+      alert("Upload error: " + (error.message || "Failed to upload file"));
     } finally {
       setUploading(prev => ({ ...prev, [fieldName]: false }));
     }
@@ -947,20 +983,68 @@ export default function EditPropertyPage() {
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Video Walkthrough URL</label>
-              <input type="url" name="videoWalkthrough" value={formData.videoWalkthrough} onChange={handleChange} className="admin-input w-full" />
+              <input 
+                type="url" 
+                name="videoWalkthrough" 
+                value={formData.videoWalkthrough} 
+                onChange={handleChange} 
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
+                className="admin-input w-full" 
+              />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Virtual Tour 360 URL</label>
-              <input type="url" name="virtualTour360" value={formData.virtualTour360} onChange={handleChange} className="admin-input w-full" />
+              <input 
+                type="url" 
+                name="virtualTour360" 
+                value={formData.virtualTour360} 
+                onChange={handleChange} 
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
+                className="admin-input w-full" 
+              />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Property Brochure URL</label>
-              <input type="url" name="propertyBrochure" value={formData.propertyBrochure} onChange={handleChange} className="admin-input w-full" />
+              <input 
+                type="url" 
+                name="propertyBrochure" 
+                value={formData.propertyBrochure} 
+                onChange={handleChange} 
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
+                className="admin-input w-full" 
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Listing Date</label>
-                <input type="date" name="listingDate" value={formData.listingDate} onChange={handleChange} className="admin-input w-full" />
+                <input 
+                  type="date" 
+                  name="listingDate" 
+                  value={formData.listingDate} 
+                  onChange={handleChange} 
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  }}
+                  className="admin-input w-full" 
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Featured Listing</label>
@@ -1069,9 +1153,18 @@ export default function EditPropertyPage() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} onKeyDown={(e) => {
-        // Prevent form submission on Enter key unless it's the submit button
-        if (e.key === "Enter" && e.target.tagName !== "BUTTON" && e.target.type !== "submit") {
+        // Prevent form submission on Enter key in all inputs
+        // Only allow submission when explicitly clicking the submit button
+        if (e.key === "Enter") {
+          const target = e.target;
+          // Only allow Enter on submit button
+          if (target.type === "submit" || (target.tagName === "BUTTON" && target.type === "submit")) {
+            return; // Allow submission
+          }
+          // Prevent Enter key from submitting form in all other cases
           e.preventDefault();
+          e.stopPropagation();
+          return false;
         }
       }}>
         <div className="admin-card p-6">
