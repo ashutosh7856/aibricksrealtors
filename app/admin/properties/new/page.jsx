@@ -128,8 +128,6 @@ export default function NewPropertyPage() {
   });
 
   const [amenityInput, setAmenityInput] = useState("");
-  const [imageUrlInput, setImageUrlInput] = useState("");
-  const [floorPlanUrlInput, setFloorPlanUrlInput] = useState("");
   const [uploading, setUploading] = useState({});
 
   const handleFileUpload = async (file, fieldName, isArray = false) => {
@@ -194,34 +192,7 @@ export default function NewPropertyPage() {
     }));
   };
 
-  const addImageUrl = () => {
-    if (imageUrlInput.trim() && !formData.imageGallery.includes(imageUrlInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        imageGallery: [...prev.imageGallery, imageUrlInput.trim()],
-      }));
-      setImageUrlInput("");
-    }
-  };
-
   const removeImageUrl = (url) => {
-    setFormData((prev) => ({
-      ...prev,
-      imageGallery: prev.imageGallery.filter((u) => u !== url),
-    }));
-  };
-
-  const addFloorPlanUrl = () => {
-    if (floorPlanUrlInput.trim() && !formData.floorPlanImages.includes(floorPlanUrlInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        floorPlanImages: [...prev.floorPlanImages, floorPlanUrlInput.trim()],
-      }));
-      setFloorPlanUrlInput("");
-    }
-  };
-
-  const removeFloorPlanUrl = (url) => {
     setFormData((prev) => ({
       ...prev,
       floorPlanImages: prev.floorPlanImages.filter((u) => u !== url),
@@ -591,7 +562,7 @@ export default function NewPropertyPage() {
                   type="text"
                   value={amenityInput}
                   onChange={(e) => setAmenityInput(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addAmenity())}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addAmenity())}
                   className="admin-input flex-1"
                   placeholder="Add amenity (e.g., Swimming Pool, Gym)"
                 />
@@ -754,7 +725,12 @@ export default function NewPropertyPage() {
                     <input 
                         type="file" 
                         accept="image/*"
-                        onChange={(e) => handleFileUpload(e.target.files[0], "mainPropertyImage")}
+                        onChange={(e) => {
+                            if(e.target.files && e.target.files[0]) {
+                                handleFileUpload(e.target.files[0], "mainPropertyImage");
+                            }
+                        }}
+                        onClick={(e) => e.stopPropagation()}
                         className="admin-input w-full"
                     />
                     {uploading["mainPropertyImage"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
@@ -768,11 +744,12 @@ export default function NewPropertyPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => {
-                      if(e.target.files[0]) {
+                      if(e.target.files && e.target.files[0]) {
                           handleFileUpload(e.target.files[0], "imageGallery", true);
                           e.target.value = null; 
                       }
                   }}
+                  onClick={(e) => e.stopPropagation()}
                   className="admin-input flex-1"
                 />
                  {uploading["imageGallery"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
@@ -793,11 +770,12 @@ export default function NewPropertyPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => {
-                      if(e.target.files[0]) {
+                      if(e.target.files && e.target.files[0]) {
                           handleFileUpload(e.target.files[0], "floorPlanImages", true);
                           e.target.value = null;
                       }
                   }}
+                  onClick={(e) => e.stopPropagation()}
                   className="admin-input flex-1"
                 />
                 {uploading["floorPlanImages"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
@@ -909,7 +887,12 @@ export default function NewPropertyPage() {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} onKeyDown={(e) => {
+        // Prevent form submission on Enter key unless it's the submit button
+        if (e.key === "Enter" && e.target.tagName !== "BUTTON" && e.target.type !== "submit") {
+          e.preventDefault();
+        }
+      }}>
         <div className="admin-card p-6">
           <AnimatePresence mode="wait">
             <motion.div

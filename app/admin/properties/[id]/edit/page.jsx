@@ -131,8 +131,6 @@ export default function EditPropertyPage() {
   });
 
   const [amenityInput, setAmenityInput] = useState("");
-  const [imageUrlInput, setImageUrlInput] = useState("");
-  const [floorPlanUrlInput, setFloorPlanUrlInput] = useState("");
   const [uploading, setUploading] = useState({});
 
   const handleFileUpload = async (file, fieldName, isArray = false) => {
@@ -184,6 +182,38 @@ export default function EditPropertyPage() {
         // Helper function to safely get values
         const getValue = (val, defaultValue = "") => (val !== null && val !== undefined ? val : defaultValue);
         const getArray = (arr) => (Array.isArray(arr) ? arr : []);
+        
+        // Helper function to format date for date input (YYYY-MM-DD)
+        const formatDateForInput = (date) => {
+          if (!date) return "";
+          try {
+            let dateObj = null;
+            // Handle Firestore Timestamp object
+            if (date && typeof date === 'object' && typeof date.toDate === 'function') {
+              dateObj = date.toDate();
+            }
+            // Handle Firestore timestamp object with _seconds property
+            else if (date && typeof date === 'object' && date._seconds !== undefined) {
+              dateObj = new Date(date._seconds * 1000);
+            }
+            // Handle ISO string or other date formats
+            else if (typeof date === 'string' || typeof date === 'number') {
+              dateObj = new Date(date);
+            }
+            // Handle Date object
+            else if (date instanceof Date) {
+              dateObj = date;
+            }
+            
+            if (dateObj && !isNaN(dateObj.getTime())) {
+              return dateObj.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+            }
+            return "";
+          } catch (error) {
+            console.error('Error formatting date:', date, error);
+            return "";
+          }
+        };
         
         setFormData({
           // Step 1: Basic Info
@@ -273,7 +303,7 @@ export default function EditPropertyPage() {
           propertyBrochure: getValue(property.propertyBrochure),
           
           // Additional
-          listingDate: getValue(property.listingDate),
+          listingDate: formatDateForInput(property.listingDate),
           featuredListing: getValue(property.featuredListing, "No"),
           premiumListing: getValue(property.premiumListing, "No"),
           soldStatus: getValue(property.soldStatus, "No"),
@@ -317,34 +347,7 @@ export default function EditPropertyPage() {
     }));
   };
 
-  const addImageUrl = () => {
-    if (imageUrlInput.trim() && !formData.imageGallery.includes(imageUrlInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        imageGallery: [...prev.imageGallery, imageUrlInput.trim()],
-      }));
-      setImageUrlInput("");
-    }
-  };
-
   const removeImageUrl = (url) => {
-    setFormData((prev) => ({
-      ...prev,
-      imageGallery: prev.imageGallery.filter((u) => u !== url),
-    }));
-  };
-
-  const addFloorPlanUrl = () => {
-    if (floorPlanUrlInput.trim() && !formData.floorPlanImages.includes(floorPlanUrlInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        floorPlanImages: [...prev.floorPlanImages, floorPlanUrlInput.trim()],
-      }));
-      setFloorPlanUrlInput("");
-    }
-  };
-
-  const removeFloorPlanUrl = (url) => {
     setFormData((prev) => ({
       ...prev,
       floorPlanImages: prev.floorPlanImages.filter((u) => u !== url),
@@ -715,7 +718,7 @@ export default function EditPropertyPage() {
                   type="text"
                   value={amenityInput}
                   onChange={(e) => setAmenityInput(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addAmenity())}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addAmenity())}
                   className="admin-input flex-1"
                   placeholder="Add amenity (e.g., Swimming Pool, Gym)"
                 />
@@ -878,7 +881,12 @@ export default function EditPropertyPage() {
                     <input 
                         type="file" 
                         accept="image/*"
-                        onChange={(e) => handleFileUpload(e.target.files[0], "mainPropertyImage")}
+                        onChange={(e) => {
+                            if(e.target.files && e.target.files[0]) {
+                                handleFileUpload(e.target.files[0], "mainPropertyImage");
+                            }
+                        }}
+                        onClick={(e) => e.stopPropagation()}
                         className="admin-input w-full"
                     />
                     {uploading["mainPropertyImage"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
@@ -892,11 +900,12 @@ export default function EditPropertyPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => {
-                      if(e.target.files[0]) {
+                      if(e.target.files && e.target.files[0]) {
                           handleFileUpload(e.target.files[0], "imageGallery", true);
                           e.target.value = null; 
                       }
                   }}
+                  onClick={(e) => e.stopPropagation()}
                   className="admin-input flex-1"
                 />
                  {uploading["imageGallery"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
@@ -917,11 +926,12 @@ export default function EditPropertyPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => {
-                      if(e.target.files[0]) {
+                      if(e.target.files && e.target.files[0]) {
                           handleFileUpload(e.target.files[0], "floorPlanImages", true);
                           e.target.value = null;
                       }
                   }}
+                  onClick={(e) => e.stopPropagation()}
                   className="admin-input flex-1"
                 />
                 {uploading["floorPlanImages"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
@@ -1058,7 +1068,12 @@ export default function EditPropertyPage() {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} onKeyDown={(e) => {
+        // Prevent form submission on Enter key unless it's the submit button
+        if (e.key === "Enter" && e.target.tagName !== "BUTTON" && e.target.type !== "submit") {
+          e.preventDefault();
+        }
+      }}>
         <div className="admin-card p-6">
           <AnimatePresence mode="wait">
             <motion.div
