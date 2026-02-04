@@ -32,6 +32,7 @@ export default function NewPropertyPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Suppress browser extension errors (common with React DevTools, etc.)
   useEffect(() => {
@@ -170,10 +171,35 @@ export default function NewPropertyPage() {
     formData.append("path", "properties");
 
     try {
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      // Use absolute URL to prevent any navigation issues
+      const uploadUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/api/upload`
+        : '/api/upload';
+      
+      const res = await fetch(uploadUrl, { 
+        method: "POST", 
+        body: formData,
+        // Prevent any redirects or navigation
+        redirect: 'manual',
+        credentials: 'same-origin'
+      });
+      
+      // Handle redirects manually
+      if (res.type === 'opaqueredirect' || res.status === 0) {
+        throw new Error("Upload request was redirected. Please check authentication.");
+      }
       
       if (!res.ok) {
-        throw new Error(`Upload failed with status: ${res.status}`);
+        // Try to get error message from response
+        let errorMessage = `Upload failed with status: ${res.status}`;
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch (e) {
+          // If response is not JSON, use status text
+          errorMessage = res.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
       
       const data = await res.json();
@@ -195,6 +221,7 @@ export default function NewPropertyPage() {
       }
     } catch (error) {
       console.error("Upload error:", error);
+      // Only show alert, don't cause any navigation
       alert("Upload error: " + (error.message || "Failed to upload file"));
     } finally {
       setUploading(prev => ({ ...prev, [fieldName]: false }));
@@ -253,6 +280,12 @@ export default function NewPropertyPage() {
       case 3:
         // Pricing is optional
         break;
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+        // All other steps including media are optional
+        break;
       default:
         break;
     }
@@ -260,9 +293,29 @@ export default function NewPropertyPage() {
     return true;
   };
 
-  const nextStep = () => {
+  const nextStep = (e) => {
+    // Prevent any default behavior
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    // Prevent navigation if already submitting
+    if (isSubmitting || loading) {
+      console.warn("Navigation prevented - form is submitting");
+      return;
+    }
+    
     if (validateStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, STEPS.length));
+      setCurrentStep((prev) => {
+        const nextStep = Math.min(prev + 1, STEPS.length);
+        // Clear any errors when moving to next step
+        setError("");
+        console.log("Navigating to step:", nextStep);
+        return nextStep;
+      });
+    } else {
+      console.warn("Navigation prevented - validation failed for step:", currentStep);
     }
   };
 
@@ -273,9 +326,23 @@ export default function NewPropertyPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Prevent double submission
+    if (isSubmitting || loading) {
+      return;
+    }
+    
+    // Only allow submission on the last step
+    if (currentStep !== STEPS.length) {
+      console.warn("Form submission attempted on step", currentStep, "but should only submit on step", STEPS.length);
+      return;
+    }
+    
     if (!validateStep(currentStep)) return;
 
     setError("");
+    setIsSubmitting(true);
     setLoading(true);
 
     try {
@@ -305,6 +372,7 @@ export default function NewPropertyPage() {
       setError(error.message || "An error occurred. Please try again.");
     } finally {
       setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -762,11 +830,17 @@ export default function NewPropertyPage() {
                         type="file" 
                         accept="image/*"
                         onChange={(e) => {
+                            e.stopPropagation();
                             if(e.target.files && e.target.files[0]) {
                                 handleFileUpload(e.target.files[0], "mainPropertyImage");
                             }
                         }}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                        }}
+                        onMouseDown={(e) => {
+                            e.stopPropagation();
+                        }}
                         className="admin-input w-full"
                     />
                     {uploading["mainPropertyImage"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
@@ -780,12 +854,18 @@ export default function NewPropertyPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => {
+                      e.stopPropagation();
                       if(e.target.files && e.target.files[0]) {
                           handleFileUpload(e.target.files[0], "imageGallery", true);
                           e.target.value = null; 
                       }
                   }}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                      e.stopPropagation();
+                  }}
+                  onMouseDown={(e) => {
+                      e.stopPropagation();
+                  }}
                   className="admin-input flex-1"
                 />
                  {uploading["imageGallery"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
@@ -806,12 +886,18 @@ export default function NewPropertyPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => {
+                      e.stopPropagation();
                       if(e.target.files && e.target.files[0]) {
                           handleFileUpload(e.target.files[0], "floorPlanImages", true);
                           e.target.value = null;
                       }
                   }}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                      e.stopPropagation();
+                  }}
+                  onMouseDown={(e) => {
+                      e.stopPropagation();
+                  }}
                   className="admin-input flex-1"
                 />
                 {uploading["floorPlanImages"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
@@ -971,21 +1057,67 @@ export default function NewPropertyPage() {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} onKeyDown={(e) => {
-        // Prevent form submission on Enter key in all inputs
-        // Only allow submission when explicitly clicking the submit button
-        if (e.key === "Enter") {
-          const target = e.target;
-          // Only allow Enter on submit button
-          if (target.type === "submit" || (target.tagName === "BUTTON" && target.type === "submit")) {
-            return; // Allow submission
+      <form 
+        onSubmit={(e) => {
+          // Extra safety check - prevent submission if not on last step
+          if (currentStep !== STEPS.length) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.warn("Form submission prevented - not on last step. Current step:", currentStep);
+            setError("Please complete all steps before submitting.");
+            return false;
           }
-          // Prevent Enter key from submitting form in all other cases
-          e.preventDefault();
-          e.stopPropagation();
-          return false;
-        }
-      }}>
+          // Prevent if already submitting
+          if (isSubmitting || loading) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
+          // Call the actual submit handler
+          handleSubmit(e);
+        }}
+        noValidate
+        onKeyDown={(e) => {
+          // Prevent form submission on Enter key in all inputs
+          // Only allow submission when explicitly clicking the submit button
+          if (e.key === "Enter") {
+            const target = e.target;
+            // Only allow Enter on submit button
+            if (target.type === "submit" || (target.tagName === "BUTTON" && target.type === "submit")) {
+              // Double check we're on the last step
+              if (currentStep !== STEPS.length) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+              }
+              return; // Allow submission
+            }
+            // Prevent Enter key from submitting form in all other cases
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
+        }}
+        onClick={(e) => {
+          // Prevent form submission from clicks on file inputs or other non-button elements
+          const target = e.target;
+          if (target.type === "file") {
+            e.stopPropagation();
+          }
+          // Prevent form submission if not on last step
+          if (currentStep !== STEPS.length && target.type === "submit") {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
+        onMouseDown={(e) => {
+          // Additional protection for file inputs
+          const target = e.target;
+          if (target.type === "file") {
+            e.stopPropagation();
+          }
+        }}
+      >
         <div className="admin-card p-6">
           <AnimatePresence mode="wait">
             <motion.div
@@ -1032,7 +1164,15 @@ export default function NewPropertyPage() {
             ) : (
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isSubmitting || currentStep !== STEPS.length}
+                onClick={(e) => {
+                  // Ensure we're on the last step before allowing submission
+                  if (currentStep !== STEPS.length) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                  }
+                }}
                 className="admin-btn-primary flex items-center space-x-2 disabled:opacity-50"
               >
                 {loading ? (
