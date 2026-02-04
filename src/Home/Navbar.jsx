@@ -29,6 +29,22 @@ export default function Navbar({ onLoginClick }) {
     router.push("/");
   };
 
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (!e.target.closest(".user-dropdown")) {
+        setShowDropdown(false);
+      }
+    }
+
+    if (showDropdown) {
+      document.addEventListener("click", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [showDropdown]);
+
   return (
     <>
       {/* NAVBAR */}
@@ -83,13 +99,19 @@ export default function Navbar({ onLoginClick }) {
                 {showDropdown && (
                   <div className="absolute right-0 mt-3 w-44 bg-white rounded-lg shadow-lg border">
                     <button
-                      onClick={() => router.push("/dashboard")}
+                      onClick={() => {
+                        setShowDropdown(false);
+                        router.push("/dashboard");
+                      }}
                       className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                     >
                       Dashboard
                     </button>
                     <button
-                      onClick={handleLogout}
+                      onClick={() => {
+                        setShowDropdown(false);
+                        handleLogout();
+                      }}
                       className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
                     >
                       Logout

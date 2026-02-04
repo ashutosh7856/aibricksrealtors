@@ -80,6 +80,57 @@ export default function PropertyDetailPage() {
     );
   }
 
+  const hasSellerInfo =
+    property?.seller &&
+    (property.seller.sellerName ||
+      property.seller.phone ||
+      property.seller.email);
+
+  const overviewItems = [
+    {
+      label: "Built-up Area",
+      value: property.builtUpArea,
+      format: (v) => `${v} sq.ft`,
+    },
+    {
+      label: "Carpet Area",
+      value: property.carpetArea,
+      format: (v) => `${v} sq.ft`,
+    },
+    {
+      label: "Floor",
+      value:
+        property.floorNumber && property.totalFloors
+          ? `${property.floorNumber}/${property.totalFloors}`
+          : null,
+    },
+    {
+      label: "Facing",
+      value: property.facingDirection,
+    },
+    {
+      label: "Furnishing",
+      value: property.furnishing,
+    },
+    {
+      label: "Ownership",
+      value: property.ownershipType,
+    },
+    {
+      label: "Listing Type",
+      value: property.listingType,
+    },
+    {
+      label: "Builder",
+      value: property.builderName,
+    },
+  ];
+
+  const validOverviewItems = overviewItems.filter(
+    (item) =>
+      item.value !== null && item.value !== undefined && item.value !== "",
+  );
+
   return (
     <div className="bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 pt-28 pb-16">
@@ -103,37 +154,39 @@ export default function PropertyDetailPage() {
             <div className="grid grid-cols-2 gap-3 h-[320px] md:h-[400px]">
               {/* Main Image */}
               <div className="col-span-2 md:col-span-1 row-span-2 relative rounded-xl overflow-hidden bg-gray-200">
-                 {property.mainPropertyImage ? (
-                    <img 
-                        src={property.mainPropertyImage} 
-                        alt="Main" 
-                        className="w-full h-full object-cover"
-                    />
-                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
-                 )}
+                {property.mainPropertyImage ? (
+                  <img
+                    src={property.mainPropertyImage}
+                    alt="Main"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    No Image
+                  </div>
+                )}
               </div>
-              
+
               {/* Side Images */}
               <div className="hidden md:grid grid-rows-2 gap-3 h-full">
-                 <div className="relative rounded-xl overflow-hidden bg-gray-200 h-full">
-                    {property.imageGallery?.[0] && (
-                        <img 
-                            src={property.imageGallery[0]} 
-                            alt="Gallery 1" 
-                            className="w-full h-full object-cover"
-                        />
-                    )}
-                 </div>
-                 <div className="relative rounded-xl overflow-hidden bg-gray-200 h-full">
-                     {property.imageGallery?.[1] && (
-                        <img 
-                            src={property.imageGallery[1]} 
-                            alt="Gallery 2" 
-                            className="w-full h-full object-cover"
-                        />
-                    )}
-                 </div>
+                <div className="relative rounded-xl overflow-hidden bg-gray-200 h-full">
+                  {property.imageGallery?.[0] && (
+                    <img
+                      src={property.imageGallery[0]}
+                      alt="Gallery 1"
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+                <div className="relative rounded-xl overflow-hidden bg-gray-200 h-full">
+                  {property.imageGallery?.[1] && (
+                    <img
+                      src={property.imageGallery[1]}
+                      alt="Gallery 2"
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -141,17 +194,6 @@ export default function PropertyDetailPage() {
           {/* CTA CARD */}
           <div className="lg:sticky lg:top-28 h-fit">
             <div className="bg-white rounded-2xl shadow p-6 space-y-4">
-              {/* <button className="w-full bg-brickred text-white py-3 rounded-lg font-semibold">
-                Call Agent
-              </button>
-              <button className="w-full border border-brickred text-brickred py-3 rounded-lg font-semibold">
-                Enquire Now
-              </button>
-
-              <div className="text-sm text-gray-600">
-                ✔ Free Site Visit <br />
-                ✔ Verified Property <br />✔ Best Price Guaranteed
-              </div> */}
               <ContactSidebar property={property} />
               <BookSiteVisitCard property={property} />
             </div>
@@ -159,7 +201,7 @@ export default function PropertyDetailPage() {
         </div>
 
         {/* ================= OVERVIEW ================= */}
-        <Section title="Overview">
+        {/* <Section title="Overview">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <Detail
               label="Built-up Area"
@@ -179,7 +221,20 @@ export default function PropertyDetailPage() {
             <Detail label="Listing Type" value={property.listingType} />
             <Detail label="Builder" value={property.builderName} />
           </div>
-        </Section>
+        </Section> */}
+        {validOverviewItems.length > 0 && (
+          <Section title="Overview">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {validOverviewItems.map((item, index) => (
+                <Detail
+                  key={index}
+                  label={item.label}
+                  value={item.format ? item.format(item.value) : item.value}
+                />
+              ))}
+            </div>
+          </Section>
+        )}
 
         {/* ================= AMENITIES ================= */}
         {property.amenities?.length > 0 && (
@@ -187,7 +242,7 @@ export default function PropertyDetailPage() {
         )}
 
         {/* ================= SELLER ================= */}
-        <Section title="Seller Information">
+        {/* <Section title="Seller Information">
           <div className="bg-white rounded-2xl border p-6 flex flex-col md:flex-row gap-6 justify-between">
             <div className="flex gap-4 items-center">
               <div className="h-14 w-14 rounded-full bg-brickred text-white flex items-center justify-center font-bold text-lg">
@@ -203,22 +258,38 @@ export default function PropertyDetailPage() {
               </div>
             </div>
 
-            {/* <div className="flex gap-3">
-              <button className="px-5 py-2 bg-brickred text-white rounded-lg">
-                Call
-              </button>
-              <button className="px-5 py-2 border border-brickred text-brickred rounded-lg">
-                Email
-              </button>
-            </div> */}
-
             <SellerContactActions
               phone={property.seller?.phone}
               email={property.seller?.email}
               propertyTitle={property.propertyTitle}
             />
           </div>
-        </Section>
+        </Section> */}
+        {hasSellerInfo && (
+          <Section title="Seller Information">
+            <div className="bg-white rounded-2xl border p-6 flex flex-col md:flex-row gap-6 justify-between">
+              <div className="flex gap-4 items-center">
+                <div className="h-14 w-14 rounded-full bg-brickred text-white flex items-center justify-center font-bold text-lg">
+                  {property.seller?.sellerName?.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-semibold text-lg">
+                    {property.seller?.sellerName}
+                  </p>
+                  <p className="text-gray-600 text-sm">
+                    {property.seller?.sellerType}
+                  </p>
+                </div>
+              </div>
+
+              <SellerContactActions
+                phone={property.seller?.phone}
+                email={property.seller?.email}
+                propertyTitle={property.propertyTitle}
+              />
+            </div>
+          </Section>
+        )}
       </div>
     </div>
   );

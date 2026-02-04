@@ -7,19 +7,19 @@ export default function SearchPage() {
   return (
     <Suspense fallback={<SearchFallback />}>
       {/* <SearchClient /> */}
-      <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="max-w-7xl mx-auto px-4 py-24 space-y-6">
         {/* LEFT LISTINGS */}
-        <div className="lg:col-span-8 space-y-4 mt-">
-          <SearchClient />
-        </div>
+        {/* <div className="lg:col-span-8 space-y-4 mt-"> */}
+        <SearchClient />
+        {/* </div> */}
 
         {/* RIGHT SIDEBAR */}
-        <div className="hidden lg:block lg:col-span-4">
+        {/* <div className="hidden lg:block lg:col-span-4">
           <div className="sticky top-28 space-y-6">
             <ContactSidebar />
             <BookSiteVisitCard />
           </div>
-        </div>
+        </div> */}
       </div>
     </Suspense>
   );
