@@ -10,6 +10,9 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const filters = {};
 
+    // Check if count only is requested
+    const countOnly = searchParams.get('countOnly') === 'true';
+
     // Extract filters from query params
     if (searchParams.get('propertyType')) filters.propertyType = searchParams.get('propertyType');
     if (searchParams.get('listingType')) filters.listingType = searchParams.get('listingType');
@@ -19,6 +22,15 @@ export async function GET(req) {
     if (searchParams.get('minPrice')) filters.minPrice = searchParams.get('minPrice');
     if (searchParams.get('maxPrice')) filters.maxPrice = searchParams.get('maxPrice');
     if (searchParams.get('limit')) filters.limit = parseInt(searchParams.get('limit'), 10);
+
+    // If count only, return just the count
+    if (countOnly) {
+      const totalCount = await propertyModel.getCount(filters);
+      return NextResponse.json({
+        success: true,
+        count: totalCount
+      });
+    }
 
     // Check if user wants their own properties
     const authResult = await optionalAuth(req);
@@ -38,9 +50,13 @@ export async function GET(req) {
     // Convert Firestore timestamps to ISO strings
     const propertiesWithConvertedDates = properties.map(property => convertTimestamps(property));
 
+    // Get total count for accurate statistics
+    const totalCount = await propertyModel.getCount(filters);
+
     return NextResponse.json({
       success: true,
-      count: propertiesWithConvertedDates.length,
+      count: totalCount,
+      returned: propertiesWithConvertedDates.length,
       data: propertiesWithConvertedDates
     });
   } catch (error) {

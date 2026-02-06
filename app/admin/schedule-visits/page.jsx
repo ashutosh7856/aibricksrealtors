@@ -12,7 +12,7 @@ import {
   Car,
   X,
 } from "lucide-react";
-import { scheduleVisitAPI } from "@/src/admin/utils/api";
+import { scheduleVisitAPI, propertiesAPI } from "@/src/admin/utils/api";
 import "@/src/admin/styles/admin.css";
 
 export default function ScheduleVisitsPage() {
@@ -21,6 +21,8 @@ export default function ScheduleVisitsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [propertyDetails, setPropertyDetails] = useState(null); // Property details for selected visit
+  const [loadingProperty, setLoadingProperty] = useState(false);
   const hasFetched = useRef(false);
 
   useEffect(() => {
@@ -36,8 +38,15 @@ export default function ScheduleVisitsPage() {
       const response = await scheduleVisitAPI.getAll({ limit: 100 });
       
       // Backend returns: { success: true, count: number, limit: number, data: array }
+      // Backend now includes propertyTitle in the response
       if (response && response.success && Array.isArray(response.data)) {
-        setVisits(response.data);
+        // Sort by preferredDate (visit date) - newest first
+        const sortedVisits = [...response.data].sort((a, b) => {
+          const dateA = a.preferredDate ? new Date(a.preferredDate).getTime() : 0;
+          const dateB = b.preferredDate ? new Date(b.preferredDate).getTime() : 0;
+          return dateB - dateA; // Descending order (newest first)
+        });
+        setVisits(sortedVisits);
       } else if (response && response.success && !response.data) {
         // Handle case where data might be empty
         setVisits([]);
@@ -53,14 +62,49 @@ export default function ScheduleVisitsPage() {
     }
   };
 
+  const fetchPropertyDetails = async (propertyId) => {
+    if (!propertyId) return null;
+    
+    try {
+      setLoadingProperty(true);
+      const response = await propertiesAPI.getById(propertyId);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return null;
+    } catch (error) {
+      console.error(`Error fetching property ${propertyId}:`, error);
+      return null;
+    } finally {
+      setLoadingProperty(false);
+    }
+  };
+
+  const handleViewDetails = async (visit) => {
+    setSelectedVisit(visit);
+    setShowModal(true);
+    setPropertyDetails(null);
+    
+    // Only fetch property details if propertyTitle is not already in the visit data
+    if (visit.propertyId && !visit.propertyTitle) {
+      const property = await fetchPropertyDetails(visit.propertyId);
+      if (property) {
+        setPropertyDetails(property);
+      }
+    }
+  };
+
   const filteredVisits = visits.filter(
-    (visit) =>
-      visit.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      visit.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      visit.phone?.includes(searchTerm) ||
-      visit.phone?.includes(searchTerm) ||
-      visit.propertyTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (visit.cabRequired === 'yes' && 'cab'.includes(searchTerm.toLowerCase()))
+    (visit) => {
+      const propertyName = visit.propertyTitle || visit.propertyId || "";
+      return (
+        visit.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        visit.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        visit.phone?.includes(searchTerm) ||
+        propertyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (visit.cabRequired === 'yes' && 'cab'.includes(searchTerm.toLowerCase()))
+      );
+    }
   );
 
   const formatDate = (date) => {
@@ -191,7 +235,7 @@ export default function ScheduleVisitsPage() {
                     <td>
                       <div className="flex items-center text-gray-600">
                         <Building2 className="w-4 h-4 mr-2 text-gray-400" />
-                        <span className="truncate max-w-xs">
+                        <span className="truncate max-w-xs" title={visit.propertyTitle || visit.propertyId || "N/A"}>
                           {visit.propertyTitle || visit.propertyId || "N/A"}
                         </span>
                       </div>
@@ -223,10 +267,7 @@ export default function ScheduleVisitsPage() {
                     </td>
                     <td>
                       <button
-                        onClick={() => {
-                          setSelectedVisit(visit);
-                          setShowModal(true);
-                        }}
+                        onClick={() => handleViewDetails(visit)}
                         className="text-purple-600 hover:text-purple-700 font-semibold text-sm"
                       >
                         View Details
@@ -298,9 +339,20 @@ export default function ScheduleVisitsPage() {
                 </div>
                 <div className="col-span-2">
                   <p className="text-sm text-gray-500 mb-1">Property</p>
-                  <p className="text-gray-700 font-semibold">
-                    {selectedVisit.propertyTitle || selectedVisit.propertyId || "N/A"}
-                  </p>
+                  {loadingProperty ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-gray-500 text-sm">Loading property details...</span>
+                    </div>
+                  ) : (
+                    <p className="text-gray-700 font-semibold">
+                      {selectedVisit.propertyTitle || 
+                       propertyDetails?.propertyTitle || 
+                       propertyDetails?.title || 
+                       selectedVisit.propertyId || 
+                       "N/A"}
+                    </p>
+                  )}
                 </div>
                 {selectedVisit.message && (
                   <div className="col-span-2">

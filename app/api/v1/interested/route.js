@@ -68,6 +68,16 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit'), 10) || 50;
     const startAfter = searchParams.get('startAfter') || null;
+    const countOnly = searchParams.get('countOnly') === 'true';
+
+    // If count only, return just the count
+    if (countOnly) {
+      const totalCount = await interestedModel.getCount();
+      return NextResponse.json({
+        success: true,
+        count: totalCount
+      });
+    }
 
     const validLimit = Math.min(Math.max(limit, 1), 100);
     const submissions = await interestedModel.getAll(validLimit, startAfter);
@@ -75,9 +85,13 @@ export async function GET(req) {
     // Convert Firestore timestamps to ISO strings
     const submissionsWithConvertedDates = submissions.map(submission => convertTimestamps(submission));
 
+    // Get total count for accurate statistics
+    const totalCount = await interestedModel.getCount();
+
     return NextResponse.json({
       success: true,
-      count: submissionsWithConvertedDates.length,
+      count: totalCount,
+      returned: submissionsWithConvertedDates.length,
       limit: validLimit,
       data: submissionsWithConvertedDates
     });

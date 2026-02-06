@@ -43,6 +43,7 @@
   --admin-gradient-pink: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   --admin-gradient-blue: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   --admin-gradient-teal: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  --admin-gradient-purple: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
 }
 
 * {
@@ -140,6 +141,10 @@
 
 .admin-stat-card-teal {
   background: var(--admin-gradient-teal);
+}
+
+.admin-stat-card-purple {
+  background: var(--admin-gradient-purple);
 }
 
 /* Premium Buttons */

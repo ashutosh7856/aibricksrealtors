@@ -152,6 +152,12 @@ export const propertiesAPI = {
     return await apiRequest(`/v1/properties?${queryString}`);
   },
 
+  getCount: async (filters = {}) => {
+    const params = { ...filters, countOnly: true };
+    const queryString = new URLSearchParams(params).toString();
+    return await apiRequest(`/v1/properties?${queryString}`);
+  },
+
   getById: async (id) => {
     return await apiRequest(`/v1/properties/${id}`);
   },
@@ -184,6 +190,10 @@ export const contactAPI = {
     return await apiRequest(`/v1/contact?${queryString}`);
   },
 
+  getCount: async () => {
+    return await apiRequest(`/v1/contact?countOnly=true`);
+  },
+
   getById: async (id) => {
     return await apiRequest(`/v1/contact/${id}`);
   },
@@ -194,6 +204,10 @@ export const scheduleVisitAPI = {
   getAll: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
     return await apiRequest(`/v1/schedule-visit?${queryString}`);
+  },
+
+  getCount: async () => {
+    return await apiRequest(`/v1/schedule-visit?countOnly=true`);
   },
 
   getById: async (id) => {
@@ -210,6 +224,10 @@ export const interestedAPI = {
   getAll: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
     return await apiRequest(`/v1/interested?${queryString}`);
+  },
+
+  getCount: async () => {
+    return await apiRequest(`/v1/interested?countOnly=true`);
   },
 
   getById: async (id) => {
@@ -229,6 +247,13 @@ export const callRequestsAPI = {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
+  },
+};
+
+// Dashboard API
+export const dashboardAPI = {
+  getAll: async () => {
+    return await apiRequest('/v1/dashboard');
   },
 };
 

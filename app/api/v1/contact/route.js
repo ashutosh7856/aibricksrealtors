@@ -82,6 +82,16 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit'), 10) || 50;
     const startAfter = searchParams.get('startAfter') || null;
+    const countOnly = searchParams.get('countOnly') === 'true';
+
+    // If count only, return just the count
+    if (countOnly) {
+      const totalCount = await contactModel.getCount();
+      return NextResponse.json({
+        success: true,
+        count: totalCount
+      });
+    }
 
     const validLimit = Math.min(Math.max(limit, 1), 100);
     const contacts = await contactModel.getAll(validLimit, startAfter);
@@ -89,9 +99,13 @@ export async function GET(req) {
     // Convert Firestore timestamps to ISO strings
     const contactsWithConvertedDates = contacts.map(contact => convertTimestamps(contact));
 
+    // Get total count for accurate statistics
+    const totalCount = await contactModel.getCount();
+
     return NextResponse.json({
       success: true,
-      count: contactsWithConvertedDates.length,
+      count: totalCount,
+      returned: contactsWithConvertedDates.length,
       limit: validLimit,
       data: contactsWithConvertedDates
     });

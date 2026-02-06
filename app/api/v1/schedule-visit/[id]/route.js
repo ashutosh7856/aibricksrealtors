@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import scheduleVisitModel from '@/lib/models/ScheduleVisit';
+import propertyModel from '@/lib/models/Property';
 import { protect } from '@/lib/middleware/auth';
 import { authorizeAdmin } from '@/lib/middleware/authorize';
 import logger from '@/lib/logger';
@@ -38,6 +39,19 @@ export async function GET(req, { params }) {
 
     // Convert Firestore timestamps to ISO strings
     const visitWithConvertedDates = convertTimestamps(visit);
+
+    // Fetch property name if propertyId exists
+    if (visitWithConvertedDates.propertyId) {
+      try {
+        const property = await propertyModel.getById(visitWithConvertedDates.propertyId);
+        if (property) {
+          visitWithConvertedDates.propertyTitle = property.propertyTitle || property.title || null;
+        }
+      } catch (error) {
+        logger.error(`Error fetching property ${visitWithConvertedDates.propertyId} for schedule visit:`, error);
+        // Continue even if property fetch fails
+      }
+    }
 
     return NextResponse.json({
       success: true,

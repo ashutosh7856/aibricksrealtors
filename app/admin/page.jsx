@@ -12,10 +12,22 @@ import {
   PieChart,
 } from "lucide-react";
 import {
-  propertiesAPI,
-  contactAPI,
-  scheduleVisitAPI,
-  interestedAPI,
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  dashboardAPI,
 } from "@/src/admin/utils/api";
 import "@/src/admin/styles/admin.css";
 
@@ -62,6 +74,11 @@ export default function AdminDashboard() {
     interested: 0,
     loading: true,
   });
+  const [chartData, setChartData] = useState({
+    timeSeries: [],
+    trafficSources: [],
+    loading: true,
+  });
   const hasFetched = useRef(false);
 
   useEffect(() => {
@@ -69,30 +86,37 @@ export default function AdminDashboard() {
     if (hasFetched.current) return;
     hasFetched.current = true;
 
-    const fetchStats = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const [propertiesRes, contactsRes, visitsRes, interestedRes] =
-          await Promise.all([
-            propertiesAPI.getAll({ limit: 1 }),
-            contactAPI.getAll({ limit: 1 }),
-            scheduleVisitAPI.getAll({ limit: 1 }),
-            interestedAPI.getAll({ limit: 1 }),
-          ]);
+        const response = await dashboardAPI.getAll();
+        
+        if (response.success && response.data) {
+          // Set stats
+          setStats({
+            properties: response.data.stats.properties || 0,
+            contacts: response.data.stats.contacts || 0,
+            visits: response.data.stats.visits || 0,
+            interested: response.data.stats.interested || 0,
+            loading: false,
+          });
 
-        setStats({
-          properties: propertiesRes.count || 0,
-          contacts: contactsRes.count || 0,
-          visits: visitsRes.count || 0,
-          interested: interestedRes.count || 0,
-          loading: false,
-        });
+          // Set chart data
+          setChartData({
+            timeSeries: response.data.charts.timeSeries || [],
+            trafficSources: response.data.charts.trafficSources || [],
+            loading: false,
+          });
+        } else {
+          throw new Error('Invalid response format');
+        }
       } catch (error) {
-        console.error("Error fetching stats:", error);
+        console.error("Error fetching dashboard data:", error);
         setStats((prev) => ({ ...prev, loading: false }));
+        setChartData((prev) => ({ ...prev, loading: false }));
       }
     };
 
-    fetchStats();
+    fetchDashboardData();
   }, []);
 
   return (
@@ -115,7 +139,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Properties"
           value={stats.loading ? "..." : stats.properties.toLocaleString()}
@@ -142,6 +166,15 @@ export default function AdminDashboard() {
           icon={Calendar}
           gradient="admin-stat-card-teal"
           delay={0.3}
+        />
+        <StatCard
+          title="Interested"
+          value={stats.loading ? "..." : stats.interested.toLocaleString()}
+          change="Increased by 15%"
+          changeType="increase"
+          icon={Heart}
+          gradient="admin-stat-card-purple"
+          delay={0.4}
         />
       </div>
 
@@ -171,15 +204,93 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-          <div className="h-64 flex items-center justify-center bg-gray-50 rounded-xl">
-            <div className="text-center">
-              <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">Chart visualization</p>
-            </div>
+          <div className="h-64 bg-gray-50 rounded-xl p-4">
+            {chartData.loading ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  <p className="text-sm text-gray-500">Loading chart data...</p>
+                </div>
+              </div>
+            ) : chartData.timeSeries.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData.timeSeries}>
+                  <defs>
+                    <linearGradient id="colorProperties" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#7C3AED" stopOpacity={0.1}/>
+                    </linearGradient>
+                    <linearGradient id="colorVisits" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#EC4899" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#EC4899" stopOpacity={0.1}/>
+                    </linearGradient>
+                    <linearGradient id="colorContacts" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="#6B7280"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <YAxis 
+                    stroke="#6B7280"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#fff', 
+                      border: '1px solid #E5E7EB',
+                      borderRadius: '8px',
+                      fontSize: '12px'
+                    }}
+                  />
+                  <Legend 
+                    wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                  />
+                  <Area 
+                    type="monotone"
+                    dataKey="properties" 
+                    stroke="#7C3AED" 
+                    fillOpacity={1}
+                    fill="url(#colorProperties)"
+                    name="Properties"
+                    strokeWidth={2}
+                  />
+                  <Area 
+                    type="monotone"
+                    dataKey="visits" 
+                    stroke="#EC4899" 
+                    fillOpacity={1}
+                    fill="url(#colorVisits)"
+                    name="Visits"
+                    strokeWidth={2}
+                  />
+                  <Area 
+                    type="monotone"
+                    dataKey="contacts" 
+                    stroke="#3B82F6" 
+                    fillOpacity={1}
+                    fill="url(#colorContacts)"
+                    name="Contacts"
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">No data available</p>
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
 
-        {/* Traffic Sources */}
+        {/* Submission Types Distribution */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -187,37 +298,71 @@ export default function AdminDashboard() {
           className="admin-card p-6"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">Traffic Sources</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Submission Types</h2>
             <SettingsIcon className="w-5 h-5 text-gray-400" />
           </div>
-          <div className="h-64 flex items-center justify-center bg-gray-50 rounded-xl relative">
-            <div className="text-center">
-              <PieChart className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">Pie chart visualization</p>
-            </div>
-            <div className="absolute bottom-4 left-4 right-4 space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-pink-500"></div>
-                  <span className="text-gray-600">Direct</span>
+          <div className="h-64 bg-gray-50 rounded-xl p-4 relative">
+            {chartData.loading ? (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                  <p className="text-sm text-gray-500">Loading chart data...</p>
                 </div>
-                <span className="font-semibold text-gray-900">40%</span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-blue-400"></div>
-                  <span className="text-gray-600">Search</span>
+            ) : chartData.trafficSources.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height="60%">
+                  <RechartsPieChart>
+                    <Pie
+                      data={chartData.trafficSources}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percentage }) => `${name}: ${percentage}%`}
+                      outerRadius={70}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {chartData.trafficSources.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#fff', 
+                        border: '1px solid #E5E7EB',
+                        borderRadius: '8px',
+                        fontSize: '12px'
+                      }}
+                      formatter={(value, name) => [value, name]}
+                    />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+                <div className="absolute bottom-4 left-4 right-4 space-y-2">
+                  {chartData.trafficSources.map((source, index) => (
+                    <div key={index} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: source.color }}
+                        ></div>
+                        <span className="text-gray-600">{source.name}</span>
+                      </div>
+                      <span className="font-semibold text-gray-900">
+                        {source.percentage}% ({source.value})
+                      </span>
+                    </div>
+                  ))}
                 </div>
-                <span className="font-semibold text-gray-900">30%</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-teal-400"></div>
-                  <span className="text-gray-600">Referral</span>
+              </>
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <PieChart className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">No data available</p>
                 </div>
-                <span className="font-semibold text-gray-900">30%</span>
               </div>
-            </div>
+            )}
           </div>
         </motion.div>
       </div>

@@ -35,7 +35,13 @@ export default function InterestedPage() {
       
       // Backend returns: { success: true, count: number, limit: number, data: array }
       if (response && response.success && Array.isArray(response.data)) {
-        setInterested(response.data);
+        // Sort by createdAt - newest first
+        const sortedInterested = [...response.data].sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA; // Descending order (newest first)
+        });
+        setInterested(sortedInterested);
       } else if (response && response.success && !response.data) {
         // Handle case where data might be empty
         setInterested([]);

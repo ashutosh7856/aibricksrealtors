@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import scheduleVisitModel from '@/lib/models/ScheduleVisit';
+import propertyModel from '@/lib/models/Property';
 import { protect } from '@/lib/middleware/auth';
 import { authorizeAdmin } from '@/lib/middleware/authorize';
 import logger from '@/lib/logger';
@@ -76,6 +77,16 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit'), 10) || 50;
     const startAfter = searchParams.get('startAfter') || null;
+    const countOnly = searchParams.get('countOnly') === 'true';
+
+    // If count only, return just the count
+    if (countOnly) {
+      const totalCount = await scheduleVisitModel.getCount();
+      return NextResponse.json({
+        success: true,
+        count: totalCount
+      });
+    }
 
     const validLimit = Math.min(Math.max(limit, 1), 100);
     const visits = await scheduleVisitModel.getAll(validLimit, startAfter);
@@ -83,11 +94,46 @@ export async function GET(req) {
     // Convert Firestore timestamps to ISO strings
     const visitsWithConvertedDates = visits.map(visit => convertTimestamps(visit));
 
+    // Fetch property names for all unique propertyIds
+    const uniquePropertyIds = [...new Set(
+      visitsWithConvertedDates
+        .map(visit => visit.propertyId)
+        .filter(id => id) // Remove null/undefined
+    )];
+
+    // Create a map of propertyId to propertyTitle
+    const propertyNamesMap = {};
+    
+    // Fetch property details for each unique propertyId
+    await Promise.all(
+      uniquePropertyIds.map(async (propertyId) => {
+        try {
+          const property = await propertyModel.getById(propertyId);
+          if (property) {
+            propertyNamesMap[propertyId] = property.propertyTitle || property.title || null;
+          }
+        } catch (error) {
+          logger.error(`Error fetching property ${propertyId} for schedule visit:`, error);
+          // Continue even if property fetch fails
+        }
+      })
+    );
+
+    // Enrich visits with property names
+    const visitsWithPropertyNames = visitsWithConvertedDates.map(visit => ({
+      ...visit,
+      propertyTitle: visit.propertyTitle || propertyNamesMap[visit.propertyId] || null
+    }));
+
+    // Get total count for accurate statistics
+    const totalCount = await scheduleVisitModel.getCount();
+
     return NextResponse.json({
       success: true,
-      count: visitsWithConvertedDates.length,
+      count: totalCount,
+      returned: visitsWithPropertyNames.length,
       limit: validLimit,
-      data: visitsWithConvertedDates
+      data: visitsWithPropertyNames
     });
   } catch (error) {
     logger.error('Error getting all visits:', error);
