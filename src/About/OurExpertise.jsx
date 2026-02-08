@@ -62,7 +62,7 @@ export default function OurExpertise() {
             <h2 className="text-4xl font-semibold text-[var(--color-darkgray)]">
               OUR <span className="text-[var(--color-ochre)]">EXPERTISE</span>
             </h2>
-            <p className="text-gray-600 mt-2 text-lg">
+            <p className="text-gray-800 mt-2 text-lg">
               At AiBricks Realtors, we blend innovation, craftsmanship, and
               trust to deliver real estate solutions that inspire confidence and
               elevate modern living.
@@ -97,7 +97,7 @@ export default function OurExpertise() {
                 <h3 className="text-lg font-semibold mb-2">{card.title}</h3>
                 <p
                   className={`text-md ${
-                    card.active ? "text-gray-100" : "text-gray-600"
+                    card.active ? "text-gray-100" : "text-gray-800"
                   } mb-4`}
                 >
                   {card.desc}

@@ -321,9 +321,9 @@ const PropertyCard = memo(function PropertyCard({ property, onEnquire }) {
           {property.name}
         </h3>
 
-        <p className="text-gray-500 mb-3">{property.type}</p>
+        <p className="text-darkgray mb-3">{property.type}</p>
 
-        <div className="space-y-2 text-gray-600 text-sm">
+        <div className="space-y-2 text-gray-600 text-sm font-semibold">
           <p className="flex gap-2 items-center">
             <MapPin size={14} /> {property.location}
           </p>

@@ -54,7 +54,7 @@ const IntroSection = () => {
             </motion.h2>
 
             <motion.h3
-              className="text-lg md:text-xl font-medium text-gray-700 mb-4"
+              className="text-lg md:text-xl font-semibold text-gray-700 mb-4"
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.45 }}
@@ -64,7 +64,7 @@ const IntroSection = () => {
             </motion.h3>
 
             <motion.p
-              className="text-gray-600 leading-relaxed mb-4"
+              className="text-gray-800 leading-relaxed mb-4"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
@@ -79,7 +79,7 @@ const IntroSection = () => {
             </motion.p>
 
             <motion.p
-              className="text-gray-600 leading-relaxed mb-6"
+              className="text-gray-800 leading-relaxed mb-6"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
@@ -94,7 +94,7 @@ const IntroSection = () => {
             </motion.p>
 
             <motion.p
-              className="text-gray-600 leading-relaxed mb-6"
+              className="text-gray-800 leading-relaxed mb-6"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
@@ -164,7 +164,7 @@ const IntroSection = () => {
           </motion.h2>
 
           <motion.h3
-            className="text-lg md:text-xl font-medium text-gray-700 mb-4"
+            className="text-lg md:text-xl font-semibold text-gray-700 mb-4"
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.45 }}
@@ -174,7 +174,7 @@ const IntroSection = () => {
           </motion.h3>
 
           <motion.p
-            className="text-gray-600 leading-relaxed mb-4"
+            className="text-gray-800 leading-relaxed mb-4"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
@@ -189,7 +189,7 @@ const IntroSection = () => {
           </motion.p>
 
           <motion.p
-            className="text-gray-600 leading-relaxed mb-6"
+            className="text-gray-800 leading-relaxed mb-6"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.6 }}

@@ -8,7 +8,7 @@ export default function CompanyDetails() {
       icon: <Phone className="w-10 h-10 text-ochre mx-auto" />,
       title: "Call Us",
       info: "(+91) - 8130120098",
-      subtext: "Monday – Friday: 10:00 am – 06:00 pm",
+      subtext: "Monday – Friday: 10:00 am – 06:00 pm, Tuesday - Closed",
     },
     {
       icon: <Mail className="w-10 h-10 text-ochre mx-auto" />,
@@ -48,7 +48,7 @@ export default function CompanyDetails() {
             </h3>
             <p className="text-gray-800 font-medium text-base">{item.info}</p>
             <hr className="w-1/2 border-gray-300" />
-            <p className="text-sm text-gray-600">{item.subtext}</p>
+            <p className="text-sm text-gray-800">{item.subtext}</p>
           </div>
         ))}
       </div>

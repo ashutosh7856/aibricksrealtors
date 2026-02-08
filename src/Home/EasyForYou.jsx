@@ -14,7 +14,7 @@ export default function EasyForYou() {
         </span>
       </h2>
 
-      <p className="text-gray-600 max-w-3xl text-sm sm:text-base md:text-lg mb-12">
+      <p className="text-gray-800 max-w-3xl text-sm sm:text-base md:text-lg mb-12">
         Whether it’s selling your current home, getting financing, or buying a
         new home, we make it easy and efficient. The best part? You’ll save a
         bunch of money and time with our services.
@@ -33,7 +33,7 @@ export default function EasyForYou() {
               <h3 className="font-semibold text-lg text-gray-900 mb-1">
                 Find the best deal
               </h3>
-              <p className="text-gray-600 text-sm sm:text-base">
+              <p className="text-gray-800 text-sm sm:text-base">
                 Browse thousands of properties, save your favorites and set up
                 search alerts so you don’t miss the best home deal!
               </p>
