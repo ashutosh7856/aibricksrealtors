@@ -152,7 +152,7 @@ export default function EditPropertyPage() {
     floorPlanImages: [],
     videoWalkthrough: "",
     virtualTour360: "",
-    propertyBrochure: "",
+    brochures: [{ name: "", url: "" }],
     
     // Additional
     listingDate: "",
@@ -363,7 +363,11 @@ export default function EditPropertyPage() {
           floorPlanImages: getArray(property.floorPlanImages),
           videoWalkthrough: getValue(property.videoWalkthrough),
           virtualTour360: getValue(property.virtualTour360),
-          propertyBrochure: getValue(property.propertyBrochure),
+          brochures: property.brochures && Array.isArray(property.brochures) && property.brochures.length > 0
+            ? property.brochures
+            : property.propertyBrochure
+              ? [{ name: "Property Brochure", url: property.propertyBrochure }]
+              : [{ name: "", url: "" }],
           
           // Additional
           listingDate: formatDateForInput(property.listingDate),
@@ -413,7 +417,98 @@ export default function EditPropertyPage() {
   const removeImageUrl = (url) => {
     setFormData((prev) => ({
       ...prev,
+      imageGallery: prev.imageGallery.filter((u) => u !== url),
+    }));
+  };
+
+  const removeFloorPlanUrl = (url) => {
+    setFormData((prev) => ({
+      ...prev,
       floorPlanImages: prev.floorPlanImages.filter((u) => u !== url),
+    }));
+  };
+
+  const handleBrochureUpload = async (file, index) => {
+    if (!file) return;
+    
+    // Validate PDF file
+    if (file.type !== 'application/pdf') {
+      alert('Please upload a PDF file');
+      return;
+    }
+    
+    setUploading(prev => ({ ...prev, [`brochure-${index}`]: true }));
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("path", "properties/brochures");
+
+    try {
+      const uploadUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/api/upload`
+        : '/api/upload';
+      
+      const res = await fetch(uploadUrl, { 
+        method: "POST", 
+        body: formData,
+        redirect: 'manual',
+        credentials: 'same-origin'
+      });
+      
+      if (res.type === 'opaqueredirect' || res.status === 0) {
+        throw new Error("Upload request was redirected. Please check authentication.");
+      }
+      
+      if (!res.ok) {
+        let errorMessage = `Upload failed with status: ${res.status}`;
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch (e) {
+          errorMessage = res.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        setFormData(prev => ({
+          ...prev,
+          brochures: prev.brochures.map((brochure, idx) => 
+            idx === index ? { ...brochure, url: data.url } : brochure
+          )
+        }));
+      } else {
+        alert("Upload failed: " + (data.error || "Unknown error"));
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("Upload error: " + (error.message || "Failed to upload file"));
+    } finally {
+      setUploading(prev => ({ ...prev, [`brochure-${index}`]: false }));
+    }
+  };
+
+  const addBrochure = () => {
+    setFormData(prev => ({
+      ...prev,
+      brochures: [...prev.brochures, { name: "", url: "" }]
+    }));
+  };
+
+  const removeBrochure = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      brochures: prev.brochures.filter((_, idx) => idx !== index)
+    }));
+  };
+
+  const handleBrochureNameChange = (index, name) => {
+    setFormData(prev => ({
+      ...prev,
+      brochures: prev.brochures.map((brochure, idx) => 
+        idx === index ? { ...brochure, name } : brochure
+      )
     }));
   };
 
@@ -508,7 +603,13 @@ export default function EditPropertyPage() {
         const value = formData[key];
         if (value !== "" && value !== null && value !== undefined) {
           if (Array.isArray(value)) {
-            if (value.length > 0) submitData[key] = value;
+            if (key === 'brochures') {
+              // Filter out empty brochures (those without both name and url)
+              const validBrochures = value.filter(b => b.name || b.url);
+              if (validBrochures.length > 0) submitData[key] = validBrochures;
+            } else if (value.length > 0) {
+              submitData[key] = value;
+            }
           } else {
             submitData[key] = value;
           }
@@ -1100,20 +1201,71 @@ export default function EditPropertyPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Property Brochure URL</label>
-              <input 
-                type="url" 
-                name="propertyBrochure" 
-                value={formData.propertyBrochure} 
-                onChange={handleChange} 
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }
-                }}
-                className="admin-input w-full" 
-              />
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Property Brochures</label>
+              <div className="space-y-4">
+                {formData.brochures.map((brochure, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium text-gray-700">Brochure {index + 1}</h4>
+                      {formData.brochures.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeBrochure(index)}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Brochure Name</label>
+                      <input
+                        type="text"
+                        value={brochure.name}
+                        onChange={(e) => handleBrochureNameChange(index, e.target.value)}
+                        placeholder="e.g., Main Brochure, Floor Plans, Amenities Guide"
+                        className="admin-input w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Upload PDF</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          accept="application/pdf"
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            if (e.target.files && e.target.files[0]) {
+                              handleBrochureUpload(e.target.files[0], index);
+                              e.target.value = null;
+                            }
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          className="admin-input flex-1"
+                        />
+                        {uploading[`brochure-${index}`] && (
+                          <span className="text-blue-600 animate-pulse text-sm">Uploading...</span>
+                        )}
+                      </div>
+                      {brochure.url && (
+                        <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
+                          <p className="text-sm text-green-700">
+                            ✓ PDF uploaded: <a href={brochure.url} target="_blank" rel="noopener noreferrer" className="underline">View PDF</a>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addBrochure}
+                  className="w-full py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-purple-500 hover:text-purple-600 transition-colors text-sm font-medium"
+                >
+                  + Add More Brochures
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

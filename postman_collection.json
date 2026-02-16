@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "aibricks-backend-api-v1",
 		"name": "AI Bricks Backend API v1.0.0",
-		"description": "Complete API collection for AI Bricks Backend Platform\n\n**Base URL:** `http://localhost:3000/api`\n\n**Version:** 1.0.0\n\n**Features:**\n- Property management with embedded seller data\n- User authentication and authorization\n- Advanced search and filtering\n- Contact form submission (public POST, admin GET)\n- Property visit scheduling (public POST, admin GET)\n- I am interested form (public POST, admin GET)\n- Admin-only data retrieval endpoints\n- Default admin user: admin@gmail.com / admin@123\n- Performance optimized (seller data denormalized)",
+		"description": "Complete API collection for AI Bricks Backend Platform\n\n**Base URL:** `http://localhost:3000/api`\n\n**Version:** 1.0.0\n\n**Features:**\n- Property management with embedded seller data and multiple brochures support\n- User authentication and authorization\n- Advanced search and filtering\n- Contact form submission (public POST, admin GET)\n- Property visit scheduling (public POST, admin GET)\n- I am interested form (public POST, admin GET)\n- Admin dashboard with statistics and charts (single API call)\n- Admin-only data retrieval endpoints\n- Default admin user: admin@gmail.com / admin@123\n- Performance optimized (seller data denormalized)\n- Property brochures: Array of PDF documents with names",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "aibricks"
 	},
@@ -628,7 +628,7 @@
 									"value": "application/json"
 								}
 							],
-							"body": "{\n  \"success\": true,\n  \"count\": 2,\n  \"data\": [\n    {\n      \"id\": \"property-id-1\",\n      \"userId\": \"user-id-123\",\n      \"propertyTitle\": \"Luxury 3 BHK Apartment\",\n      \"propertyType\": \"Apartment\",\n      \"subType\": \"3 BHK\",\n      \"listingType\": \"Sale\",\n      \"propertyStatus\": \"Ready to Move\",\n      \"furnishing\": \"Furnished\",\n      \"builtUpArea\": 1500,\n      \"carpetArea\": 1200,\n      \"floorNumber\": 5,\n      \"totalFloors\": 10,\n      \"facingDirection\": \"East\",\n      \"ownershipType\": \"Freehold\",\n      \"country\": \"India\",\n      \"state\": \"Maharashtra\",\n      \"city\": \"Pune\",\n      \"locality\": \"Hinjewadi\",\n      \"totalPrice\": 3500000,\n      \"pricePerSquareFoot\": 2333,\n      \"projectName\": \"Luxury Heights\",\n      \"builderName\": \"ABC Developers\",\n      \"amenities\": [\"Gym\", \"Swimming Pool\", \"Parking\"],\n      \"seller\": {\n        \"sellerType\": \"Agent\",\n        \"sellerName\": \"John Doe\",\n        \"phoneNumber\": \"+919876543210\",\n        \"email\": \"john@example.com\",\n        \"companyName\": \"ABC Realty\",\n        \"verifiedBadge\": \"Yes\",\n        \"responseRate\": \"95%\",\n        \"rating\": 4.8\n      },\n      \"activeStatus\": \"Yes\",\n      \"createdAt\": {\n        \"_seconds\": 1705046400,\n        \"_nanoseconds\": 0\n      },\n      \"updatedAt\": {\n        \"_seconds\": 1705046400,\n        \"_nanoseconds\": 0\n      }\n    }\n  ]\n}"
+							"body": "{\n  \"success\": true,\n  \"count\": 2,\n  \"data\": [\n    {\n      \"id\": \"property-id-1\",\n      \"userId\": \"user-id-123\",\n      \"propertyTitle\": \"Luxury 3 BHK Apartment\",\n      \"propertyType\": \"Apartment\",\n      \"subType\": \"3 BHK\",\n      \"listingType\": \"Sale\",\n      \"propertyStatus\": \"Ready to Move\",\n      \"furnishing\": \"Furnished\",\n      \"builtUpArea\": 1500,\n      \"carpetArea\": 1200,\n      \"floorNumber\": 5,\n      \"totalFloors\": 10,\n      \"facingDirection\": \"East\",\n      \"ownershipType\": \"Freehold\",\n      \"country\": \"India\",\n      \"state\": \"Maharashtra\",\n      \"city\": \"Pune\",\n      \"locality\": \"Hinjewadi\",\n      \"totalPrice\": 3500000,\n      \"pricePerSquareFoot\": 2333,\n      \"projectName\": \"Luxury Heights\",\n      \"builderName\": \"ABC Developers\",\n      \"amenities\": [\"Gym\", \"Swimming Pool\", \"Parking\"],\n      \"brochures\": [\n        {\n          \"name\": \"Main Brochure\",\n          \"url\": \"https://storage.googleapis.com/bucket/properties/brochures/1234567890-brochure.pdf\"\n        }\n      ],\n      \"seller\": {\n        \"sellerType\": \"Agent\",\n        \"sellerName\": \"John Doe\",\n        \"phoneNumber\": \"+919876543210\",\n        \"email\": \"john@example.com\",\n        \"companyName\": \"ABC Realty\",\n        \"verifiedBadge\": \"Yes\",\n        \"responseRate\": \"95%\",\n        \"rating\": 4.8\n      },\n      \"activeStatus\": \"Yes\",\n      \"createdAt\": {\n        \"_seconds\": 1705046400,\n        \"_nanoseconds\": 0\n      },\n      \"updatedAt\": {\n        \"_seconds\": 1705046400,\n        \"_nanoseconds\": 0\n      }\n    }\n  ]\n}"
 						}
 					]
 				},
@@ -684,7 +684,7 @@
 									"value": "application/json"
 								}
 							],
-							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"abc123xyz\",\n    \"userId\": \"user-id-123\",\n    \"propertyTitle\": \"Luxury 3 BHK Apartment\",\n    \"propertyType\": \"Apartment\",\n    \"subType\": \"3 BHK\",\n    \"listingType\": \"Sale\",\n    \"propertyStatus\": \"Ready to Move\",\n    \"furnishing\": \"Furnished\",\n    \"builtUpArea\": 1500,\n    \"carpetArea\": 1200,\n    \"floorNumber\": 5,\n    \"totalFloors\": 10,\n    \"facingDirection\": \"East\",\n    \"ownershipType\": \"Freehold\",\n    \"country\": \"India\",\n    \"state\": \"Maharashtra\",\n    \"city\": \"Mumbai\",\n    \"locality\": \"Andheri\",\n    \"landmark\": \"Near Metro Station\",\n    \"totalPrice\": 3500000,\n    \"pricePerSquareFoot\": 2333,\n    \"projectName\": \"Luxury Heights\",\n    \"builderName\": \"ABC Developers\",\n    \"amenities\": [\"Gym\", \"Swimming Pool\", \"Parking\", \"Garden\"],\n    \"imageGallery\": [],\n    \"floorPlanImages\": [],\n    \"listingDate\": \"2026-01-01\",\n    \"totalViews\": 150,\n    \"totalInquiries\": 25,\n    \"shortlistedCount\": 10,\n    \"featuredListing\": \"Yes\",\n    \"premiumListing\": \"No\",\n    \"soldStatus\": \"No\",\n    \"activeStatus\": \"Yes\",\n    \"seller\": {\n      \"sellerType\": \"Agent\",\n      \"sellerName\": \"John Doe\",\n      \"phoneNumber\": \"+919876543210\",\n      \"email\": \"john@example.com\",\n      \"companyName\": \"ABC Realty\",\n      \"verifiedBadge\": \"Yes\",\n      \"responseRate\": \"95%\",\n      \"rating\": 4.8\n    },\n    \"createdAt\": {\n      \"_seconds\": 1705046400,\n      \"_nanoseconds\": 0\n    },\n    \"updatedAt\": {\n      \"_seconds\": 1705046400,\n      \"_nanoseconds\": 0\n    }\n  }\n}"
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"abc123xyz\",\n    \"userId\": \"user-id-123\",\n    \"propertyTitle\": \"Luxury 3 BHK Apartment\",\n    \"propertyType\": \"Apartment\",\n    \"subType\": \"3 BHK\",\n    \"listingType\": \"Sale\",\n    \"propertyStatus\": \"Ready to Move\",\n    \"furnishing\": \"Furnished\",\n    \"builtUpArea\": 1500,\n    \"carpetArea\": 1200,\n    \"floorNumber\": 5,\n    \"totalFloors\": 10,\n    \"facingDirection\": \"East\",\n    \"ownershipType\": \"Freehold\",\n    \"country\": \"India\",\n    \"state\": \"Maharashtra\",\n    \"city\": \"Mumbai\",\n    \"locality\": \"Andheri\",\n    \"landmark\": \"Near Metro Station\",\n    \"totalPrice\": 3500000,\n    \"pricePerSquareFoot\": 2333,\n    \"projectName\": \"Luxury Heights\",\n    \"builderName\": \"ABC Developers\",\n    \"amenities\": [\"Gym\", \"Swimming Pool\", \"Parking\", \"Garden\"],\n    \"imageGallery\": [],\n    \"floorPlanImages\": [],\n    \"brochures\": [\n      {\n        \"name\": \"Main Brochure\",\n        \"url\": \"https://storage.googleapis.com/bucket/properties/brochures/1234567890-brochure.pdf\"\n      },\n      {\n        \"name\": \"Floor Plans\",\n        \"url\": \"https://storage.googleapis.com/bucket/properties/brochures/1234567891-floorplans.pdf\"\n      }\n    ],\n    \"listingDate\": \"2026-01-01\",\n    \"totalViews\": 150,\n    \"totalInquiries\": 25,\n    \"shortlistedCount\": 10,\n    \"featuredListing\": \"Yes\",\n    \"premiumListing\": \"No\",\n    \"soldStatus\": \"No\",\n    \"activeStatus\": \"Yes\",\n    \"seller\": {\n      \"sellerType\": \"Agent\",\n      \"sellerName\": \"John Doe\",\n      \"phoneNumber\": \"+919876543210\",\n      \"email\": \"john@example.com\",\n      \"companyName\": \"ABC Realty\",\n      \"verifiedBadge\": \"Yes\",\n      \"responseRate\": \"95%\",\n      \"rating\": 4.8\n    },\n    \"createdAt\": {\n      \"_seconds\": 1705046400,\n      \"_nanoseconds\": 0\n    },\n    \"updatedAt\": {\n      \"_seconds\": 1705046400,\n      \"_nanoseconds\": 0\n    }\n  }\n}"
 						},
 						{
 							"name": "Error - Not Found",
@@ -1037,7 +1037,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"propertyTitle\": \"Luxury 3 BHK Apartment in Andheri\",\n  \"propertyType\": \"Apartment\",\n  \"subType\": \"3 BHK\",\n  \"listingType\": \"Sale\",\n  \"propertyStatus\": \"Ready to Move\",\n  \"furnishing\": \"Furnished\",\n  \"builtUpArea\": 1500,\n  \"carpetArea\": 1200,\n  \"floorNumber\": 5,\n  \"totalFloors\": 15,\n  \"facingDirection\": \"East\",\n  \"ownershipType\": \"Freehold\",\n  \"country\": \"India\",\n  \"state\": \"Maharashtra\",\n  \"city\": \"Mumbai\",\n  \"locality\": \"Andheri\",\n  \"landmark\": \"Andheri Metro Station\",\n  \"totalPrice\": 3500000,\n  \"pricePerSquareFoot\": 2333,\n  \"projectName\": \"Luxury Heights\",\n  \"builderName\": \"ABC Developers\",\n  \"amenities\": [\"Swimming Pool\", \"Gym\", \"Park\", \"Security\"],\n  \"sellerType\": \"Agent\",\n  \"sellerName\": \"John Doe\",\n  \"phoneNumber\": \"+919876543210\",\n  \"email\": \"john@example.com\",\n  \"companyName\": \"ABC Realty\",\n  \"verifiedBadge\": \"Yes\"\n}",
+							"raw": "{\n  \"propertyTitle\": \"Luxury 3 BHK Apartment in Andheri\",\n  \"propertyType\": \"Apartment\",\n  \"subType\": \"3 BHK\",\n  \"listingType\": \"Sale\",\n  \"propertyStatus\": \"Ready to Move\",\n  \"furnishing\": \"Furnished\",\n  \"builtUpArea\": 1500,\n  \"carpetArea\": 1200,\n  \"floorNumber\": 5,\n  \"totalFloors\": 15,\n  \"facingDirection\": \"East\",\n  \"ownershipType\": \"Freehold\",\n  \"country\": \"India\",\n  \"state\": \"Maharashtra\",\n  \"city\": \"Mumbai\",\n  \"locality\": \"Andheri\",\n  \"landmark\": \"Andheri Metro Station\",\n  \"totalPrice\": 3500000,\n  \"pricePerSquareFoot\": 2333,\n  \"projectName\": \"Luxury Heights\",\n  \"builderName\": \"ABC Developers\",\n  \"amenities\": [\"Swimming Pool\", \"Gym\", \"Park\", \"Security\"],\n  \"brochures\": [\n    {\n      \"name\": \"Main Brochure\",\n      \"url\": \"https://storage.googleapis.com/bucket/properties/brochures/1234567890-brochure.pdf\"\n    },\n    {\n      \"name\": \"Floor Plans\",\n      \"url\": \"https://storage.googleapis.com/bucket/properties/brochures/1234567891-floorplans.pdf\"\n    }\n  ],\n  \"sellerType\": \"Agent\",\n  \"sellerName\": \"John Doe\",\n  \"phoneNumber\": \"+919876543210\",\n  \"email\": \"john@example.com\",\n  \"companyName\": \"ABC Realty\",\n  \"verifiedBadge\": \"Yes\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1106,7 +1106,7 @@
 									"value": "application/json"
 								}
 							],
-							"body": "{\n  \"success\": true,\n  \"message\": \"Property created successfully\",\n  \"data\": {\n    \"id\": \"new-property-id-123\",\n    \"userId\": \"user-id-123\",\n    \"propertyTitle\": \"Luxury 3 BHK Apartment in Andheri\",\n    \"propertyType\": \"Apartment\",\n    \"subType\": \"3 BHK\",\n    \"listingType\": \"Sale\",\n    \"propertyStatus\": \"Ready to Move\",\n    \"city\": \"Mumbai\",\n    \"locality\": \"Andheri\",\n    \"totalPrice\": 3500000,\n    \"seller\": {\n      \"sellerType\": \"Agent\",\n      \"sellerName\": \"John Doe\",\n      \"phoneNumber\": \"+919876543210\",\n      \"email\": \"john@example.com\",\n      \"companyName\": \"ABC Realty\",\n      \"verifiedBadge\": \"Yes\",\n      \"responseRate\": null,\n      \"rating\": null\n    },\n    \"activeStatus\": \"Yes\",\n    \"createdAt\": {\n      \"_seconds\": 1705046400,\n      \"_nanoseconds\": 0\n    },\n    \"updatedAt\": {\n      \"_seconds\": 1705046400,\n      \"_nanoseconds\": 0\n    }\n  }\n}"
+							"body": "{\n  \"success\": true,\n  \"message\": \"Property created successfully\",\n  \"data\": {\n    \"id\": \"new-property-id-123\",\n    \"userId\": \"user-id-123\",\n    \"propertyTitle\": \"Luxury 3 BHK Apartment in Andheri\",\n    \"propertyType\": \"Apartment\",\n    \"subType\": \"3 BHK\",\n    \"listingType\": \"Sale\",\n    \"propertyStatus\": \"Ready to Move\",\n    \"city\": \"Mumbai\",\n    \"locality\": \"Andheri\",\n    \"totalPrice\": 3500000,\n    \"brochures\": [\n      {\n        \"name\": \"Main Brochure\",\n        \"url\": \"https://storage.googleapis.com/bucket/properties/brochures/1234567890-brochure.pdf\"\n      },\n      {\n        \"name\": \"Floor Plans\",\n        \"url\": \"https://storage.googleapis.com/bucket/properties/brochures/1234567891-floorplans.pdf\"\n      }\n    ],\n    \"seller\": {\n      \"sellerType\": \"Agent\",\n      \"sellerName\": \"John Doe\",\n      \"phoneNumber\": \"+919876543210\",\n      \"email\": \"john@example.com\",\n      \"companyName\": \"ABC Realty\",\n      \"verifiedBadge\": \"Yes\",\n      \"responseRate\": null,\n      \"rating\": null\n    },\n    \"activeStatus\": \"Yes\",\n    \"createdAt\": {\n      \"_seconds\": 1705046400,\n      \"_nanoseconds\": 0\n    },\n    \"updatedAt\": {\n      \"_seconds\": 1705046400,\n      \"_nanoseconds\": 0\n    }\n  }\n}"
 						},
 						{
 							"name": "Error - Validation Failed",
@@ -1183,7 +1183,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"propertyTitle\": \"Updated Property Title\",\n  \"totalPrice\": 3800000,\n  \"sellerName\": \"Updated Seller Name\",\n  \"sellerType\": \"Builder\"\n}",
+							"raw": "{\n  \"propertyTitle\": \"Updated Property Title\",\n  \"totalPrice\": 3800000,\n  \"brochures\": [\n    {\n      \"name\": \"Updated Main Brochure\",\n      \"url\": \"https://storage.googleapis.com/bucket/properties/brochures/1234567892-updated-brochure.pdf\"\n    }\n  ],\n  \"sellerName\": \"Updated Seller Name\",\n  \"sellerType\": \"Builder\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1261,7 +1261,7 @@
 									"value": "application/json"
 								}
 							],
-							"body": "{\n  \"success\": true,\n  \"message\": \"Property updated successfully\",\n  \"data\": {\n    \"id\": \"abc123xyz\",\n    \"propertyTitle\": \"Updated Property Title\",\n    \"totalPrice\": 3800000,\n    \"seller\": {\n      \"sellerType\": \"Builder\",\n      \"sellerName\": \"Updated Seller Name\",\n      \"phoneNumber\": \"+919876543210\",\n      \"email\": \"john@example.com\",\n      \"companyName\": \"ABC Realty\",\n      \"verifiedBadge\": \"Yes\"\n    },\n    \"updatedAt\": {\n      \"_seconds\": 1705046500,\n      \"_nanoseconds\": 0\n    }\n  }\n}"
+							"body": "{\n  \"success\": true,\n  \"message\": \"Property updated successfully\",\n  \"data\": {\n    \"id\": \"abc123xyz\",\n    \"propertyTitle\": \"Updated Property Title\",\n    \"totalPrice\": 3800000,\n    \"brochures\": [\n      {\n        \"name\": \"Updated Main Brochure\",\n        \"url\": \"https://storage.googleapis.com/bucket/properties/brochures/1234567892-updated-brochure.pdf\"\n      }\n    ],\n    \"seller\": {\n      \"sellerType\": \"Builder\",\n      \"sellerName\": \"Updated Seller Name\",\n      \"phoneNumber\": \"+919876543210\",\n      \"email\": \"john@example.com\",\n      \"companyName\": \"ABC Realty\",\n      \"verifiedBadge\": \"Yes\"\n    },\n    \"updatedAt\": {\n      \"_seconds\": 1705046500,\n      \"_nanoseconds\": 0\n    }\n  }\n}"
 						},
 						{
 							"name": "Error - Not Found",
@@ -2533,6 +2533,143 @@
 				}
 			],
 			"description": "\"I am interested\" form endpoints. POST is public (no authentication required). GET endpoints are admin only."
+		},
+		{
+			"name": "Dashboard v1",
+			"item": [
+				{
+					"name": "Get Dashboard Data",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/dashboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"dashboard"
+							]
+						},
+						"description": "Get all dashboard statistics and chart data in a single call. Returns counts for properties, contacts, visits, and interested submissions, plus time series data for charts and traffic sources distribution. Admin only - requires authentication and admin role."
+					},
+					"response": [
+						{
+							"name": "Success",
+							"originalRequest": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/v1/dashboard",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"dashboard"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"success\": true,\n  \"data\": {\n    \"stats\": {\n      \"properties\": 150,\n      \"contacts\": 45,\n      \"visits\": 32,\n      \"interested\": 28\n    },\n    \"charts\": {\n      \"timeSeries\": [\n        {\n          \"date\": \"Jan 6\",\n          \"fullDate\": \"2026-01-06\",\n          \"properties\": 2,\n          \"visits\": 3,\n          \"contacts\": 5\n        },\n        {\n          \"date\": \"Jan 7\",\n          \"fullDate\": \"2026-01-07\",\n          \"properties\": 1,\n          \"visits\": 4,\n          \"contacts\": 3\n        },\n        {\n          \"date\": \"Jan 8\",\n          \"fullDate\": \"2026-01-08\",\n          \"properties\": 3,\n          \"visits\": 2,\n          \"contacts\": 6\n        },\n        {\n          \"date\": \"Jan 9\",\n          \"fullDate\": \"2026-01-09\",\n          \"properties\": 0,\n          \"visits\": 5,\n          \"contacts\": 4\n        },\n        {\n          \"date\": \"Jan 10\",\n          \"fullDate\": \"2026-01-10\",\n          \"properties\": 2,\n          \"visits\": 3,\n          \"contacts\": 2\n        },\n        {\n          \"date\": \"Jan 11\",\n          \"fullDate\": \"2026-01-11\",\n          \"properties\": 1,\n          \"visits\": 4,\n          \"contacts\": 5\n        },\n        {\n          \"date\": \"Jan 12\",\n          \"fullDate\": \"2026-01-12\",\n          \"properties\": 3,\n          \"visits\": 2,\n          \"contacts\": 3\n        }\n      ],\n      \"trafficSources\": [\n        {\n          \"name\": \"Contacts\",\n          \"value\": 45,\n          \"percentage\": 43,\n          \"color\": \"#3B82F6\"\n        },\n        {\n          \"name\": \"Visits\",\n          \"value\": 32,\n          \"percentage\": 30,\n          \"color\": \"#EC4899\"\n        },\n        {\n          \"name\": \"Interested\",\n          \"value\": 28,\n          \"percentage\": 27,\n          \"color\": \"#10B981\"\n        }\n      ]\n    }\n  }\n}"
+						},
+						{
+							"name": "Error - Unauthorized",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/v1/dashboard",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"dashboard"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"success\": false,\n  \"error\": \"Not authorized to access this route. Please provide a token.\"\n}"
+						},
+						{
+							"name": "Error - Forbidden (Not Admin)",
+							"originalRequest": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/v1/dashboard",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"v1",
+										"dashboard"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"success\": false,\n  \"error\": \"Access denied. Admin privileges required.\"\n}"
+						}
+					]
+				}
+			],
+			"description": "Dashboard endpoint for admin panel. Returns all statistics and chart data in a single optimized call. Admin only - requires authentication and admin role."
 		}
 	],
 	"event": [

@@ -19,6 +19,8 @@ import {
   XCircle,
   Calendar,
   Eye,
+  FileText,
+  Download,
 } from "lucide-react";
 import { propertiesAPI } from "@/src/admin/utils/api";
 import Link from "next/link";
@@ -497,7 +499,7 @@ export default function PropertyViewPage() {
           )}
 
           {/* Media */}
-          {(property.imageGallery?.length > 0 || property.floorPlanImages?.length > 0 || property.videoWalkthrough || property.virtualTour360) && (
+          {(property.imageGallery?.length > 0 || property.floorPlanImages?.length > 0 || property.videoWalkthrough || property.virtualTour360 || (property.brochures && property.brochures.length > 0) || property.propertyBrochure) && (
             <div className="admin-card p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
                 <ImageIcon className="mr-2 text-purple-600" size={24} />
@@ -532,13 +534,56 @@ export default function PropertyViewPage() {
                 </div>
               )}
               {property.virtualTour360 && (
-                <div>
+                <div className="mb-4">
                   <h3 className="text-sm font-semibold text-gray-700 mb-2">Virtual Tour 360</h3>
                   <a href={property.virtualTour360} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">
                     {property.virtualTour360}
                   </a>
                 </div>
               )}
+              {(property.brochures && property.brochures.length > 0) || property.propertyBrochure ? (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Property Brochures</h3>
+                  <div className="space-y-2">
+                    {property.brochures && property.brochures.length > 0 ? (
+                      property.brochures.map((brochure, idx) => (
+                        brochure.url && (
+                          <a
+                            key={idx}
+                            href={brochure.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-2 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                          >
+                            <FileText className="text-purple-600" size={20} />
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-800">
+                                {brochure.name || `Brochure ${idx + 1}`}
+                              </p>
+                              <p className="text-xs text-gray-500 truncate">{brochure.url}</p>
+                            </div>
+                            <Download className="text-gray-400" size={18} />
+                          </a>
+                        )
+                      ))
+                    ) : property.propertyBrochure ? (
+                      <a
+                        href={property.propertyBrochure}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-2 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                      >
+                        <FileText className="text-purple-600" size={20} />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-800">Property Brochure</p>
+                          <p className="text-xs text-gray-500 truncate">{property.propertyBrochure}</p>
+                        </div>
+                        <Download className="text-gray-400" size={18} />
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
             </div>
           )}
         </div>
