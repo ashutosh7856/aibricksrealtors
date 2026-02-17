@@ -6,6 +6,7 @@ import { CarFront } from "lucide-react";
 import BookSiteVisitModal from "../Properties/BookSiteVisitModal";
 import ContactSidebar from "../Properties/ContactSidebar";
 import BookSiteVisitCard from "../Properties/BookSiteVisitCard";
+import Image from "next/image";
 
 export default function SearchClient() {
   const searchParams = useSearchParams();
@@ -149,8 +150,20 @@ export default function SearchClient() {
             className="bg-white border rounded-xl p-4 flex flex-col md:flex-row gap-4 hover:shadow-lg transition"
           >
             {/* IMAGE */}
-            <div className="w-full md:w-56 h-40 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
+            {/* <div className="w-full md:w-56 h-40 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
               Image Coming Soon
+            </div> */}
+            <div className="relative w-full sm:w-[260px] h-[180px] rounded-lg overflow-hidden bg-gray-200">
+              <Image
+                src={
+                  item.mainPropertyImage ||
+                  item.imageGallery?.[0] ||
+                  "/home/upcoming/sobha-kharadi.webp"
+                }
+                alt={item.propertyTitle}
+                fill
+                className="object-cover"
+              />
             </div>
 
             {/* DETAILS */}

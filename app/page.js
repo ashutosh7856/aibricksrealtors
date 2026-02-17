@@ -10,7 +10,7 @@ import StatsSection from "@/src/Home/StatsSection";
 import TrendingProjectsClient from "@/src/Home/TrendingProjectsClient";
 
 export const metadata = {
-  title: "India’s First AI-Driven Real Estate Platform | AI Bricks Realtors",
+  title: "AI Bricks Realtors | India’s First AI-Driven Real Estate Platform | ",
   description:
     "AI Bricks Realtors is India’s first AI-driven real estate platform, empowering buyers, sellers, and investors to make smarter property decisions with data-backed insights.",
 
