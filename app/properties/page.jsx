@@ -5,6 +5,8 @@ import PropertyCard from "@/src/Properties/PropertyCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { headers } from "next/headers";
+import FAQSection from "@/src/FAQSection";
+import { propertyFaqs } from "@/data/faq";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -94,7 +96,7 @@ export default async function PageProperties({ searchParams }) {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 mb-10">
         {/* LEFT LISTINGS */}
         <div className="lg:col-span-8 space-y-4">
           {paginatedProperties.map((property) => (
@@ -164,6 +166,7 @@ export default async function PageProperties({ searchParams }) {
           </div>
         </div>
       </div>
+      <FAQSection title="Frequently Asked Questions" faqs={propertyFaqs} />
     </div>
   );
 }

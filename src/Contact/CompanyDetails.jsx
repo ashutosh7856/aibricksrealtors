@@ -27,8 +27,19 @@ export default function CompanyDetails() {
 
   return (
     <section className="w-full py-16 ">
-      <div className="w-full h-[500px]">
-        <img src="/home/dubai.webp" className="w-full h-full" />
+      <div className="relative w-full h-[500px]">
+        <img src="/home/dubai.webp" className="w-full h-full " alt="Dubai" />
+
+        {/* BLACK BLUR OVERLAY */}
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-xs"></div>
+
+        {/* CENTER TEXT */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <h2 className="text-white text-3xl md:text-5xl font-semibold text-center drop-shadow-lg line-clamp-3">
+            Reach Out for Smart
+            <br /> Real Estate Solutions
+          </h2>
+        </div>
       </div>
       {/* Heading */}
       <h2 className="text-center text-3xl md:text-4xl text-darkgray font-bold mt-16 mb-12">

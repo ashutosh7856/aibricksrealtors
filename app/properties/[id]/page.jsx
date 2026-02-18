@@ -420,6 +420,8 @@ import {
 import ContactSidebar from "@/src/Properties/ContactSidebar";
 import BookSiteVisitCard from "@/src/Properties/BookSiteVisitCard";
 import SellerContactActions from "@/src/Properties/SellerContactActions";
+import LoginModal from "@/src/Auth/LoginModal";
+import toast from "react-hot-toast";
 
 /* ================= UTIL ================= */
 
@@ -484,7 +486,7 @@ export default function PropertyDetailPage() {
             <OverviewCard property={property} />
             <LocationMap property={property} />
             <VideoSection />
-            <ProsCons />
+            {/* <ProsCons /> */}
             <AmenitiesGrid amenities={property.amenities} />
             <MasterPlan property={property} />
             <PricingCard property={property} />
@@ -612,16 +614,16 @@ function VideoSection() {
 
 /* ================= PROS CONS ================= */
 
-function ProsCons() {
-  return (
-    <Card title="Pros & Cons">
-      <div className="space-y-3">
-        <Accordion title="Pros" />
-        <Accordion title="Cons" />
-      </div>
-    </Card>
-  );
-}
+// function ProsCons() {
+//   return (
+//     <Card title="Pros & Cons">
+//       <div className="space-y-3">
+//         <Accordion title="Pros" />
+//         <Accordion title="Cons" />
+//       </div>
+//     </Card>
+//   );
+// }
 
 /* ================= AMENITIES ================= */
 
@@ -721,49 +723,66 @@ function LegalDetails({ property }) {
 
 function DocumentsSection({ property }) {
   const brochures = property?.brochures || [];
+  const [showLogin, setShowLogin] = useState(false);
 
-  function handleDownload(url, name) {
-    const token = localStorage.getItem("token");
+  const isLoggedIn = () => {
+    if (typeof window === "undefined") return false;
+    return !!localStorage.getItem("token");
+  };
 
-    // NOT LOGGED IN → OPEN LOGIN MODAL
-    if (!token) {
-      window.dispatchEvent(new Event("open-login-modal"));
+  const handleDownload = (url, name) => {
+    if (!isLoggedIn()) {
+      setShowLogin(true);
       return;
     }
 
-    // LOGGED IN → DOWNLOAD FILE
+    if (!url) {
+      toast.error("Document not available");
+      return;
+    }
+
+    if (url) {
+      window.open(url, "_blank");
+      return;
+    }
+
     const link = document.createElement("a");
     link.href = url;
     link.download = name || "Property_Brochure";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }
+  };
 
   return (
-    <Card title="Documents">
-      {brochures.length === 0 ? (
-        <p className="text-gray-600">No documents available</p>
-      ) : (
-        <div className="space-y-3">
-          {brochures.map((doc, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between border rounded-lg p-3"
-            >
-              <p className="text-sm font-medium">{doc.name}</p>
-
-              <button
-                onClick={() => handleDownload(doc.url, doc.name)}
-                className="bg-brickred text-white px-4 py-2 rounded-lg text-sm"
+    <>
+      <Card title="Documents">
+        {brochures.length === 0 ? (
+          <p className="text-gray-600">No documents available</p>
+        ) : (
+          <div className="space-y-3">
+            {brochures.map((doc, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between border rounded-lg p-3"
               >
-                Download
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </Card>
+                <p className="text-sm font-medium">{doc.name}</p>
+
+                <button
+                  onClick={() => handleDownload(doc.url, doc.name)}
+                  className="bg-brickred text-white px-4 py-2 rounded-lg text-sm"
+                >
+                  Download
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      {/* LOGIN MODAL */}
+      <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
+    </>
   );
 }
 
@@ -788,12 +807,6 @@ function BuilderSection({ property }) {
         <div>
           <p className="font-semibold">{property.sellerName}</p>
           <p className="text-gray-500 text-sm">Project Developer</p>
-          {/* {property.email && (
-            <p className="text-sm text-gray-600">{property.email}</p>
-          )}
-          {property.phoneNumber && (
-            <p className="text-sm text-gray-600">{property.phoneNumber}</p>
-          )} */}
         </div>
 
         <SellerContactActions
@@ -809,11 +822,35 @@ function BuilderSection({ property }) {
 /* ================= FAQ ================= */
 
 function FAQSection() {
+  const faqs = [
+    {
+      q: "What is the possession timeline for this property?",
+      a: "Possession depends on construction status. Ready-to-move properties are available immediately, while under-construction projects follow the RERA possession schedule. Contact our team for the latest timeline.",
+    },
+    {
+      q: "Is home loan assistance available?",
+      a: "Yes. Most properties are approved by leading banks and financial institutions. We assist buyers in securing home loans with competitive interest rates and quick processing.",
+    },
+    {
+      q: "Are there additional charges beyond the listed price?",
+      a: "The listed price usually covers the base cost. Additional charges may include registration, stamp duty, GST (if applicable), maintenance deposit, parking, and clubhouse fees.",
+    },
+    {
+      q: "Can I schedule a site visit before booking?",
+      a: "Absolutely. We encourage site visits so buyers can evaluate the property, amenities, and surroundings. Our team can arrange a guided visit at your convenience.",
+    },
+    {
+      q: "Is the property legally verified and RERA registered?",
+      a: "We prioritize transparency and list properties with proper documentation. Most projects are RERA registered and compliant with regulations. Document verification assistance is available on request.",
+    },
+  ];
+
   return (
-    <Card title="FAQ">
+    <Card title="Frequently Asked Questions">
       <div className="space-y-3">
-        <Accordion title="What is possession date?" />
-        <Accordion title="Is bank loan available?" />
+        {faqs.map((item, i) => (
+          <Accordion key={i} title={item.q} content={item.a} />
+        ))}
       </div>
     </Card>
   );
@@ -837,7 +874,7 @@ function FAQSection() {
 function Card({ title, children }) {
   return (
     <div className="bg-white border rounded-xl p-6">
-      <h2 className="text-lg font-semibold mb-4">{title}</h2>
+      <h2 className="text-xl font-semibold mb-4">{title}</h2>
       {children}
     </div>
   );
@@ -875,11 +912,29 @@ function GalleryItem({ src }) {
   );
 }
 
-function Accordion({ title }) {
+function Accordion({ title, content }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="border rounded-lg p-4 flex justify-between items-center">
-      {title}
-      <ChevronDown size={18} />
+    <div className="border rounded-lg overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex justify-between items-center p-4 text-left font-medium text-md"
+      >
+        {title}
+        <ChevronDown
+          size={18}
+          className={`transition-transform duration-300 ${
+            open ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 text-gray-600 text-md leading-relaxed">
+          {content}
+        </div>
+      )}
     </div>
   );
 }

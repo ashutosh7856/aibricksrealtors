@@ -8,6 +8,8 @@ import Cta from "@/src/Home/Cta";
 import EasyForYou from "@/src/Home/EasyForYou";
 import StatsSection from "@/src/Home/StatsSection";
 import TrendingProjectsClient from "@/src/Home/TrendingProjectsClient";
+import FAQSection from "@/src/FAQSection";
+import { homeFaqs } from "@/data/faq";
 
 export const metadata = {
   title: "AI Bricks Realtors | India’s First AI-Driven Real Estate Platform | ",
@@ -52,6 +54,7 @@ export default function Home() {
       <DemandSection />
       <Cta />
       <EasyForYou />
+      <FAQSection title="Frequently Asked Questions" faqs={homeFaqs} />
       <StatsSection />
     </main>
   );
