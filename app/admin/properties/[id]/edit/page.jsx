@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, Building2, MapPin, DollarSign, Home, Briefcase, User, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Building2, MapPin, DollarSign, Home, Briefcase, User, Image as ImageIcon, Plus } from "lucide-react";
 import { propertiesAPI } from "@/src/admin/utils/api";
 import Link from "next/link";
 import "@/src/admin/styles/admin.css";
@@ -149,6 +149,7 @@ export default function EditPropertyPage() {
     // Step 7: Media
     mainPropertyImage: "",
     imageGallery: [],
+    floorPlans: [],
     floorPlanImages: [],
     videoWalkthrough: "",
     virtualTour360: "",
@@ -164,6 +165,14 @@ export default function EditPropertyPage() {
 
   const [amenityInput, setAmenityInput] = useState("");
   const [uploading, setUploading] = useState({});
+  const [showFloorPlanModal, setShowFloorPlanModal] = useState(false);
+  const [floorPlanDraft, setFloorPlanDraft] = useState({
+    name: "",
+    image: "",
+    carpetArea: "",
+    price: "",
+  });
+  const imageGalleryInputRef = useRef(null);
 
   const handleFileUpload = async (file, fieldName, isArray = false) => {
     if (!file) return;
@@ -360,6 +369,14 @@ export default function EditPropertyPage() {
           // Step 7: Media
           mainPropertyImage: getValue(property.mainPropertyImage),
           imageGallery: getArray(property.imageGallery),
+          floorPlans: getArray(property.floorPlans).length > 0
+            ? getArray(property.floorPlans)
+            : getArray(property.floorPlanImages).map((image, index) => ({
+                name: `Floor Plan ${index + 1}`,
+                image,
+                carpetArea: "",
+                price: "",
+              })),
           floorPlanImages: getArray(property.floorPlanImages),
           videoWalkthrough: getValue(property.videoWalkthrough),
           virtualTour360: getValue(property.virtualTour360),
@@ -421,11 +438,85 @@ export default function EditPropertyPage() {
     }));
   };
 
-  const removeFloorPlanUrl = (url) => {
+  const handleImageGalleryFiles = async (files) => {
+    if (!files || files.length === 0) return;
+    for (const file of files) {
+      // Keep existing upload behavior and append one-by-one
+      // eslint-disable-next-line no-await-in-loop
+      await handleFileUpload(file, "imageGallery", true);
+    }
+  };
+
+  const resetFloorPlanDraft = () => {
+    setFloorPlanDraft({
+      name: "",
+      image: "",
+      carpetArea: "",
+      price: "",
+    });
+  };
+
+  const uploadFloorPlanImage = async (file) => {
+    if (!file) return;
+    setUploading((prev) => ({ ...prev, floorPlanDraftImage: true }));
+    const fileFormData = new FormData();
+    fileFormData.append("file", file);
+    fileFormData.append("path", "properties/floor-plans");
+    try {
+      const uploadUrl = typeof window !== "undefined" ? `${window.location.origin}/api/upload` : "/api/upload";
+      const res = await fetch(uploadUrl, {
+        method: "POST",
+        body: fileFormData,
+        redirect: "manual",
+        credentials: "same-origin",
+      });
+      if (!res.ok) {
+        throw new Error(`Upload failed with status: ${res.status}`);
+      }
+      const data = await res.json();
+      if (data.success && data.url) {
+        setFloorPlanDraft((prev) => ({ ...prev, image: data.url }));
+      } else {
+        alert("Upload failed: " + (data.error || "Unknown error"));
+      }
+    } catch (uploadError) {
+      alert("Upload error: " + (uploadError.message || "Failed to upload image"));
+    } finally {
+      setUploading((prev) => ({ ...prev, floorPlanDraftImage: false }));
+    }
+  };
+
+  const addFloorPlan = () => {
+    if (!floorPlanDraft.name || !floorPlanDraft.image || !floorPlanDraft.carpetArea || !floorPlanDraft.price) {
+      alert("Please fill name, image, carpet area and price for floor plan");
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
-      floorPlanImages: prev.floorPlanImages.filter((u) => u !== url),
+      floorPlans: [
+        ...prev.floorPlans,
+        {
+          name: floorPlanDraft.name.trim(),
+          image: floorPlanDraft.image,
+          carpetArea: Number(floorPlanDraft.carpetArea),
+          price: Number(floorPlanDraft.price),
+        },
+      ],
+      floorPlanImages: [...prev.floorPlanImages, floorPlanDraft.image],
     }));
+    resetFloorPlanDraft();
+    setShowFloorPlanModal(false);
+  };
+
+  const removeFloorPlan = (index) => {
+    setFormData((prev) => {
+      const floorPlans = prev.floorPlans.filter((_, idx) => idx !== index);
+      return {
+        ...prev,
+        floorPlans,
+        floorPlanImages: floorPlans.map((plan) => plan.image).filter(Boolean),
+      };
+    });
   };
 
   const handleBrochureUpload = async (file, index) => {
@@ -1106,27 +1197,29 @@ export default function EditPropertyPage() {
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Image Gallery</label>
-              <div className="flex gap-2 mb-2 items-center">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                      e.stopPropagation();
-                      if(e.target.files && e.target.files[0]) {
-                          handleFileUpload(e.target.files[0], "imageGallery", true);
-                          e.target.value = null; 
-                      }
-                  }}
-                  onClick={(e) => {
-                      e.stopPropagation();
-                  }}
-                  onMouseDown={(e) => {
-                      e.stopPropagation();
-                  }}
-                  className="admin-input flex-1"
-                />
-                 {uploading["imageGallery"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
-              </div>
+              <input
+                ref={imageGalleryInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  e.stopPropagation();
+                  if (e.target.files?.length) {
+                    handleImageGalleryFiles(Array.from(e.target.files));
+                    e.target.value = null;
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => imageGalleryInputRef.current?.click()}
+                className="w-28 h-28 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center text-purple-600 hover:bg-purple-50 transition-colors"
+              >
+                <Plus size={26} />
+                <span className="text-xs mt-1">Add Images</span>
+              </button>
+              {uploading["imageGallery"] && <span className="text-blue-600 animate-pulse text-sm">Uploading...</span>}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                 {formData.imageGallery.map((url, idx) => (
                   <div key={idx} className="relative group">
@@ -1137,33 +1230,25 @@ export default function EditPropertyPage() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Floor Plan Images</label>
-              <div className="flex gap-2 mb-2 items-center">
-                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                      e.stopPropagation();
-                      if(e.target.files && e.target.files[0]) {
-                          handleFileUpload(e.target.files[0], "floorPlanImages", true);
-                          e.target.value = null;
-                      }
-                  }}
-                  onClick={(e) => {
-                      e.stopPropagation();
-                  }}
-                  onMouseDown={(e) => {
-                      e.stopPropagation();
-                  }}
-                  className="admin-input flex-1"
-                />
-                {uploading["floorPlanImages"] && <span className="text-blue-600 animate-pulse">Uploading...</span>}
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                {formData.floorPlanImages.map((url, idx) => (
-                  <div key={idx} className="relative group">
-                    <img src={url} alt={`Floor Plan ${idx}`} className="h-24 w-full object-cover rounded border" />
-                    <button type="button" onClick={() => removeFloorPlanUrl(url)} className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Floor Plans</label>
+              <button
+                type="button"
+                onClick={() => setShowFloorPlanModal(true)}
+                className="w-28 h-28 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center text-purple-600 hover:bg-purple-50 transition-colors"
+              >
+                <Plus size={26} />
+                <span className="text-xs mt-1">Add Plan</span>
+              </button>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                {formData.floorPlans.map((plan, idx) => (
+                  <div key={`${plan.image}-${idx}`} className="border rounded-lg p-3 bg-white">
+                    <img src={plan.image} alt={plan.name || `Floor Plan ${idx + 1}`} className="h-28 w-full object-cover rounded border mb-2" />
+                    <p className="text-sm font-semibold text-gray-800">{plan.name}</p>
+                    <p className="text-xs text-gray-600">Carpet: {plan.carpetArea || "-"} sq ft</p>
+                    <p className="text-xs text-gray-600">Price: {plan.price || "-"}</p>
+                    <button type="button" onClick={() => removeFloorPlan(idx)} className="mt-2 text-xs text-red-600 hover:text-red-700">
+                      Remove
+                    </button>
                   </div>
                 ))}
               </div>
@@ -1343,6 +1428,76 @@ export default function EditPropertyPage() {
 
   return (
     <div className="space-y-6 animate-slide-in">
+      {showFloorPlanModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4">
+            <h3 className="text-lg font-bold text-gray-800">Add Floor Plan</h3>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                value={floorPlanDraft.name}
+                onChange={(e) => setFloorPlanDraft((prev) => ({ ...prev, name: e.target.value }))}
+                className="admin-input w-full"
+                placeholder="e.g., 2 BHK Premium"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    uploadFloorPlanImage(e.target.files[0]);
+                    e.target.value = null;
+                  }
+                }}
+                className="admin-input w-full"
+              />
+              {uploading.floorPlanDraftImage && <p className="text-xs text-blue-600 mt-1">Uploading...</p>}
+              {floorPlanDraft.image && <img src={floorPlanDraft.image} alt="Floor plan draft" className="h-24 w-full object-cover rounded border mt-2" />}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Carpet Area (sq ft)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={floorPlanDraft.carpetArea}
+                  onChange={(e) => setFloorPlanDraft((prev) => ({ ...prev, carpetArea: e.target.value }))}
+                  className="admin-input w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price (₹)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={floorPlanDraft.price}
+                  onChange={(e) => setFloorPlanDraft((prev) => ({ ...prev, price: e.target.value }))}
+                  className="admin-input w-full"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                className="admin-btn-secondary"
+                onClick={() => {
+                  resetFloorPlanDraft();
+                  setShowFloorPlanModal(false);
+                }}
+              >
+                Cancel
+              </button>
+              <button type="button" className="admin-btn-primary" onClick={addFloorPlan}>
+                Add Floor Plan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

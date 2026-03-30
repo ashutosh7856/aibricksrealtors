@@ -3,6 +3,7 @@ import propertyModel from '@/lib/models/Property';
 import { protect, optionalAuth } from '@/lib/middleware/auth';
 import logger from '@/lib/logger';
 import { convertTimestamps } from '@/lib/utils/timestampConverter';
+import { normalizeFloorPlansFromBody } from '@/lib/utils/floorPlans';
 
 // GET - Get all properties (public, but can filter by user if authenticated)
 export async function GET(req) {
@@ -83,10 +84,13 @@ export async function POST(req) {
     }
 
     const body = await req.json();
+    const { floorPlans, floorPlanImages } = normalizeFloorPlansFromBody(body);
     
     // Add userId to property data
     const propertyData = {
       ...body,
+      floorPlans,
+      floorPlanImages,
       userId: authResult.user.id,
     };
 

@@ -402,7 +402,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   MapPin,
@@ -415,6 +415,8 @@ import {
   Building2,
   Users,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import ContactSidebar from "@/src/Properties/ContactSidebar";
@@ -434,6 +436,8 @@ export default function PropertyDetailPage() {
   const { id } = useParams();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [developerProperties, setDeveloperProperties] = useState([]);
+  const [developerLoading, setDeveloperLoading] = useState(false);
 
   useEffect(() => {
     async function fetchProperty() {
@@ -444,6 +448,33 @@ export default function PropertyDetailPage() {
     }
     if (id) fetchProperty();
   }, [id]);
+
+  useEffect(() => {
+    async function fetchDeveloperProperties() {
+      if (!property?.builderName) {
+        setDeveloperProperties([]);
+        return;
+      }
+      setDeveloperLoading(true);
+      try {
+        const query = new URLSearchParams({
+          developer: property.builderName,
+          limit: "12",
+        });
+        const res = await fetch(`/api/v1/properties/search?${query.toString()}`);
+        const data = await res.json();
+        const list = Array.isArray(data?.data) ? data.data : [];
+        setDeveloperProperties(list.filter((item) => item.id !== property.id));
+      } catch (error) {
+        console.error("Failed to load developer properties", error);
+        setDeveloperProperties([]);
+      } finally {
+        setDeveloperLoading(false);
+      }
+    }
+
+    fetchDeveloperProperties();
+  }, [property]);
 
   if (loading) return <CenterMsg msg="Loading property details..." />;
   if (!property) return <CenterMsg msg="Property not found" />;
@@ -494,7 +525,13 @@ export default function PropertyDetailPage() {
             <DocumentsSection property={property} />
             {/* <QRSection /> */}
             <BuilderSection property={property} />
+            <GallerySlider property={property} />
             <FAQSection />
+            <SameDeveloperCarousel
+              developerName={property.builderName}
+              properties={developerProperties}
+              loading={developerLoading}
+            />
             {/* <RelatedProjects /> */}
           </div>
 
@@ -647,35 +684,96 @@ function AmenitiesGrid({ amenities = [] }) {
 /* ================= MASTER PLAN ================= */
 
 function MasterPlan({ property }) {
-  const images =
-    property?.floorPlanImages ||
-    property?.data?.floorPlanImages ||
-    property?.data?.[0]?.floorPlanImages ||
-    [];
-
-  const floorPlanImage = images[0];
+  const floorPlans = Array.isArray(property?.floorPlans)
+    ? property.floorPlans
+    : Array.isArray(property?.floorPlanImages)
+      ? property.floorPlanImages.map((image, idx) => ({
+          name: `Floor Plan ${idx + 1}`,
+          image,
+          carpetArea: "-",
+          price: "-",
+        }))
+      : [];
+  const [selectedFloorPlan, setSelectedFloorPlan] = useState(null);
+  const formatPlanPrice = (price) => {
+    const numericPrice = Number(price);
+    if (!Number.isFinite(numericPrice) || numericPrice <= 0) return "Price on request";
+    return formatPrice(numericPrice);
+  };
 
   return (
     <Card title="Master & Floor Plan">
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="h-72 bg-gray-100 rounded-lg flex items-center justify-center">
-          Master Plan
-        </div>
-
-        <div className="h-72 bg-gray-100 rounded-lg overflow-hidden">
-          {floorPlanImage ? (
-            <img
-              src={floorPlanImage}
-              alt="Floor Plan"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              Floor Plan Not Available
+      {floorPlans.length === 0 ? (
+        <div className="text-gray-500">Floor Plan Not Available</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {floorPlans.map((plan, idx) => (
+            <div
+              key={`${plan.image}-${idx}`}
+              className="rounded-xl border border-gray-300 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="px-3 py-2 border-b border-gray-200">
+                <p className="text-sm font-semibold text-gray-800 truncate">
+                  {plan.name || `${idx + 1} BHK`}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedFloorPlan(plan)}
+                className="w-full px-3 pt-3 text-left"
+              >
+                <div className="h-36 bg-gray-100 rounded border overflow-hidden">
+                  {plan.image ? (
+                    <img src={plan.image} alt={plan.name || `Floor Plan ${idx + 1}`} className="w-full h-full object-contain" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
+                  )}
+                </div>
+              </button>
+              <div className="px-3 pb-3 pt-2">
+                <p className="text-xs text-gray-500">
+                  Carpet Area: {plan.carpetArea ? `${plan.carpetArea} sq ft` : "-"}
+                </p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
+                  {formatPlanPrice(plan.price)}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSelectedFloorPlan(plan)}
+                  className="mt-3 w-full bg-[#0f2f5f] hover:bg-[#123a73] text-white text-sm font-medium py-2 rounded-md"
+                >
+                  Price Breakup
+                </button>
+              </div>
             </div>
-          )}
+          ))}
         </div>
-      </div>
+      )}
+      {selectedFloorPlan && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-xl p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{selectedFloorPlan.name || "Floor Plan"}</h3>
+            <img
+              src={selectedFloorPlan.image}
+              alt={selectedFloorPlan.name || "Floor Plan"}
+              className="w-full max-h-80 object-contain rounded border mb-4"
+            />
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <Detail label="Carpet Area" value={`${selectedFloorPlan.carpetArea || "-"} sq ft`} />
+              <Detail label="Price" value={formatPlanPrice(selectedFloorPlan.price)} />
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                type="button"
+                onClick={() => setSelectedFloorPlan(null)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
@@ -786,6 +884,104 @@ function DocumentsSection({ property }) {
   );
 }
 
+/* ================= GALLERY SLIDER ================= */
+
+function GallerySlider({ property }) {
+  const galleryImages = [
+    property?.mainPropertyImage,
+    ...(Array.isArray(property?.imageGallery) ? property.imageGallery : []),
+  ].filter(Boolean);
+
+  const [activeImage, setActiveImage] = useState(null);
+  const scrollContainer = useRef(null);
+
+  const slideBy = (direction) => {
+    if (!scrollContainer.current) return;
+    const cardWidth = 260;
+    scrollContainer.current.scrollBy({
+      left: direction * cardWidth,
+      behavior: "smooth",
+    });
+  };
+
+  if (galleryImages.length === 0) {
+    return (
+      <Card title="Gallery">
+        <p className="text-gray-500">No gallery images available</p>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      <Card title="Gallery">
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => slideBy(-1)}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center hover:bg-gray-50"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={20} />
+          </button>
+
+          <div
+            ref={scrollContainer}
+            className="overflow-x-auto scroll-smooth hide-scrollbar px-12"
+          >
+            <div className="flex gap-4 w-max">
+              {galleryImages.map((image, index) => (
+                <button
+                  type="button"
+                  key={`${image}-${index}`}
+                  onClick={() => setActiveImage(image)}
+                  className="w-[240px] h-[170px] shrink-0 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <img
+                    src={image}
+                    alt={`Gallery ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => slideBy(1)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center hover:bg-gray-50"
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      </Card>
+
+      {activeImage && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl p-4">
+            <img
+              src={activeImage}
+              alt="Gallery preview"
+              className="w-full max-h-[75vh] object-contain rounded-lg border"
+            />
+            <div className="flex justify-end mt-3">
+              <button
+                type="button"
+                onClick={() => setActiveImage(null)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 /* ================= QR ================= */
 
 // function QRSection() {
@@ -852,6 +1048,88 @@ function FAQSection() {
           <Accordion key={i} title={item.q} content={item.a} />
         ))}
       </div>
+    </Card>
+  );
+}
+
+function SameDeveloperCarousel({ developerName, properties, loading }) {
+  const sliderRef = useRef(null);
+
+  const slideBy = (direction) => {
+    if (!sliderRef.current) return;
+    sliderRef.current.scrollBy({
+      left: direction * 300,
+      behavior: "smooth",
+    });
+  };
+
+  if (!developerName) return null;
+
+  return (
+    <Card title={`Properties From ${developerName}`}>
+      {loading ? (
+        <p className="text-gray-500">Loading properties...</p>
+      ) : properties.length === 0 ? (
+        <p className="text-gray-500">No other properties from this developer yet.</p>
+      ) : (
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => slideBy(-1)}
+            className="absolute left-1 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center hover:bg-gray-50"
+            aria-label="Previous properties"
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          <div
+            ref={sliderRef}
+            className="overflow-x-auto scroll-smooth hide-scrollbar px-12"
+          >
+            <div className="flex gap-4 w-max">
+              {properties.map((item) => (
+                <a
+                  key={item.id}
+                  href={`/properties/${item.id}`}
+                  className="w-[280px] shrink-0 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="h-44 bg-gray-100">
+                    {item.mainPropertyImage ? (
+                      <img
+                        src={item.mainPropertyImage}
+                        alt={item.propertyTitle || item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="text-sm font-semibold text-gray-800 truncate">
+                      {item.propertyTitle || item.title || "Property"}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate mt-1">
+                      {item.locality || "-"}, {item.city || "-"}
+                    </p>
+                    <p className="text-lg font-bold text-brickred mt-2">
+                      {formatPrice(item.totalPrice || item.price)}
+                    </p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => slideBy(1)}
+            className="absolute right-1 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-white border border-gray-200 shadow flex items-center justify-center hover:bg-gray-50"
+            aria-label="Next properties"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      )}
     </Card>
   );
 }

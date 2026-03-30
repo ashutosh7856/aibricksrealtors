@@ -4,6 +4,7 @@ import { protect } from '@/lib/middleware/auth';
 import { authorizeProperty } from '@/lib/middleware/authorize';
 import logger from '@/lib/logger';
 import { convertTimestamps } from '@/lib/utils/timestampConverter';
+import { normalizeFloorPlansFromBody } from '@/lib/utils/floorPlans';
 
 // GET - Get property by ID (public)
 export async function GET(req, { params }) {
@@ -63,7 +64,12 @@ export async function PUT(req, { params }) {
     }
 
     const body = await req.json();
-    const property = await propertyModel.update(id, body);
+    const { floorPlans, floorPlanImages } = normalizeFloorPlansFromBody(body);
+    const property = await propertyModel.update(id, {
+      ...body,
+      floorPlans,
+      floorPlanImages,
+    });
 
     if (!property) {
       return NextResponse.json(
