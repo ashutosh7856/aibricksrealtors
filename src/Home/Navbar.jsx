@@ -467,7 +467,7 @@ export default function Navbar({ onLoginClick }) {
   useEffect(() => {
     async function fetchBuilders() {
       try {
-        const res = await fetch("http://localhost:3000/api/v1/properties");
+        const res = await fetch("/api/v1/properties");
         const data = await res.json();
 
         const uniqueBuilders = [
