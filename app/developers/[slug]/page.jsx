@@ -1,3 +1,69 @@
+// import { developersFaqs } from "@/data/faq";
+// import { formatBuilderName } from "@/lib/utils/formatBuilderName";
+// import AboutDeveloper from "@/src/Developers/AboutDeveloper";
+// import DeveloperHero from "@/src/Developers/DeveloperHero";
+// import DeveloperImpact from "@/src/Developers/DeveloperImpact";
+// import ProjectGrid from "@/src/Developers/ProjectGrid";
+// import FAQSection from "@/src/FAQSection";
+// import { notFound } from "next/navigation";
+
+// async function getProjects(builderName) {
+//   try {
+//     const res = await fetch("http://localhost:3000/api/v1/properties", {
+//       cache: "no-store",
+//     });
+
+//     const data = await res.json();
+
+//     return data.data.filter((item) =>
+//       item.builderName?.toLowerCase().includes(builderName.toLowerCase()),
+//     );
+//   } catch (err) {
+//     console.error(err);
+//     return [];
+//   }
+// }
+
+// export default async function DeveloperPage({ params }) {
+//   //   const builderName = formatBuilderName(params.slug);
+//   //   const projects = await getProjects(builderName);
+
+//   //   if (!projects.length) return notFound();
+//   const slug = params?.slug; // ✅ FIX
+//   const builderName = formatBuilderName(slug);
+
+//   const projects = await getProjects(builderName);
+
+//   if (!projects.length) return notFound();
+
+//   return (
+//     <div>
+//       {/* HERO */}
+//       <DeveloperHero builderName={builderName} projects={projects} />
+
+//       {/* ABOUT */}
+//       <section id="about" className="scroll-mt-28">
+//         <AboutDeveloper builderName={builderName} />
+//       </section>
+
+//       {/* PROJECTS */}
+//       <section id="projects" className="scroll-mt-28">
+//         <ProjectGrid projects={projects} />
+//       </section>
+
+//       {/* IMPACT */}
+//       <section id="impact" className="scroll-mt-28">
+//         <DeveloperImpact />
+//       </section>
+
+//       {/* FAQ */}
+//       <section id="faq" className="scroll-mt-28">
+//         <FAQSection title="Frequently Asked Questions" faqs={developersFaqs} />
+//       </section>
+//     </div>
+//   );
+// }
+
 import { developersFaqs } from "@/data/faq";
 import { formatBuilderName } from "@/lib/utils/formatBuilderName";
 import AboutDeveloper from "@/src/Developers/AboutDeveloper";
@@ -9,10 +75,11 @@ import { notFound } from "next/navigation";
 
 async function getProjects(builderName) {
   try {
-    const res = await fetch("http://localhost:3000/api/v1/properties", {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+    const res = await fetch(`${baseUrl}/api/v1/properties`, {
       cache: "no-store",
     });
-
     const data = await res.json();
 
     return data.data.filter((item) =>
@@ -25,34 +92,31 @@ async function getProjects(builderName) {
 }
 
 export default async function DeveloperPage({ params }) {
-  const builderName = formatBuilderName(params.slug);
+  const slug = params?.slug; // ✅ FIX
+  const builderName = formatBuilderName(slug);
+
   const projects = await getProjects(builderName);
 
   if (!projects.length) return notFound();
 
   return (
     <div>
-      {/* HERO */}
       <DeveloperHero builderName={builderName} projects={projects} />
 
-      {/* ABOUT */}
-      <section id="about" className="scroll-mt-28">
+      <section id="about">
         <AboutDeveloper builderName={builderName} />
       </section>
 
-      {/* PROJECTS */}
-      <section id="projects" className="scroll-mt-28">
+      <section id="projects">
         <ProjectGrid projects={projects} />
       </section>
 
-      {/* IMPACT */}
-      <section id="impact" className="scroll-mt-28">
+      <section id="impact">
         <DeveloperImpact />
       </section>
 
-      {/* FAQ */}
-      <section id="faq" className="scroll-mt-28">
-        <FAQSection title="Frequently Asked Questions" faqs={developersFaqs} />
+      <section id="faq">
+        <FAQSection faqs={developersFaqs} />
       </section>
     </div>
   );
