@@ -125,19 +125,31 @@ export default function PropertyDetailPage() {
           <div className="lg:col-span-2 space-y-10">
             <HeroGallery property={property} />
             <HighlightStrip property={property} />
-            <OverviewCard property={property} />
-            <LocationMap property={property} />
+            <div id="overview">
+              <OverviewCard property={property} />
+            </div>
+            <div id="location">
+              <LocationMap property={property} />
+            </div>
             <VideoSection />
             {/* <ProsCons /> */}
-            <AmenitiesGrid amenities={property.amenities} />
+            <div id="amenities">
+              <AmenitiesGrid amenities={property.amenities} />
+            </div>
             <MasterPlan property={property} />
-            <PricingCard property={property} />
+            <div id="pricing">
+              <PricingCard property={property} />
+            </div>
             <LegalDetails property={property} />
             <DocumentsSection property={property} />
             {/* <QRSection /> */}
             <BuilderSection property={property} />
-            <GallerySlider property={property} />
-            <FAQSection />
+            <div id="gallery">
+              <GallerySlider property={property} />
+            </div>
+            <div id="faq">
+              <FAQSection />
+            </div>
             <SameDeveloperCarousel
               developerName={property.builderName}
               properties={developerProperties}

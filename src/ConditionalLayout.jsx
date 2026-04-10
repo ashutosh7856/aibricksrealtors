@@ -36,6 +36,7 @@ import Footer from "@/src/Footer";
 import ClientLayout from "@/src/ClientLayout";
 import AuthModalController from "@/src/Auth/AuthModalController";
 import StickySectionNav from "./Developers/StickySectionNav";
+import PropertySectionNav from "./Properties/PropertySectionNav";
 
 export default function ConditionalLayout({ children }) {
   const pathname = usePathname();
@@ -44,6 +45,8 @@ export default function ConditionalLayout({ children }) {
   // ✅ NEW CONDITION
   const isDeveloperPage =
     pathname === "/developers" || pathname?.startsWith("/developers/");
+
+  const isPropertyPage = pathname.startsWith("/properties/");
 
   const authModalRef = useRef(null);
 
@@ -55,7 +58,14 @@ export default function ConditionalLayout({ children }) {
   return (
     <ClientLayout>
       {/* ✅ SWITCH NAVBAR HERE */}
-      {isDeveloperPage ? (
+      {/* {isDeveloperPage ? (
+        <StickySectionNav />
+      ) : (
+        <Navbar onLoginClick={() => authModalRef.current?.openLogin()} />
+      )} */}
+      {isPropertyPage ? (
+        <PropertySectionNav />
+      ) : isDeveloperPage ? (
         <StickySectionNav />
       ) : (
         <Navbar onLoginClick={() => authModalRef.current?.openLogin()} />
