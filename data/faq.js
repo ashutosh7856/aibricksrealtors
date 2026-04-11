@@ -89,3 +89,26 @@ export const contactFaqs = [
     a: "While our primary response team works during business hours, we endeavor to reply to urgent messages received outside these hours as soon as possible. If your matter is time-sensitive, calling during business hours is best.",
   },
 ];
+
+export const developersFaqs = [
+  {
+    q: "What are the best projects by this developer?",
+    a: "We list all verified and top-performing projects by the developer, including residential, commercial, and upcoming developments. Our platform helps you compare multiple options based on location, pricing, and amenities to choose the best project.",
+  },
+  {
+    q: "How can I verify if a project is trustworthy?",
+    a: "You should always check if the project is RERA registered, review the developer’s past track record, and verify legal approvals before investing. RERA registration ensures transparency and protects buyers from fraud or delays.",
+  },
+  {
+    q: "What types of properties are available from this developer?",
+    a: "Developers usually offer a wide range of properties including apartments, villas, commercial spaces, and plots. You can use filters on our website to explore properties based on your requirements like budget, location, and property type.",
+  },
+  {
+    q: "Are these projects good for investment?",
+    a: "Yes, projects from reputed developers are considered good investment options due to better construction quality, timely delivery, and higher resale value. Evaluating location growth and infrastructure development is also important for long-term returns.",
+  },
+  {
+    q: "What documents should I check before booking a property?",
+    a: "Before booking, ensure you verify key documents such as title deed, RERA registration, building approvals, and sale agreement. Proper documentation helps avoid legal issues and ensures a secure property purchase.",
+  },
+];

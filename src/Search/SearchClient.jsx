@@ -310,7 +310,9 @@ export default function SearchClient() {
             {/* ACTIONS */}
             <div className="md:w-52 flex flex-col justify-between">
               <p className="text-xl font-semibold text-brickred text-right mb-4">
-                ₹ {(item.totalPrice / 10000000).toFixed(2)} Cr
+                {item.totalPrice < 10000000
+                  ? `₹ ${(item.totalPrice / 100000).toFixed(0)} Lakhs`
+                  : `₹ ${(item.totalPrice / 10000000).toFixed(2)} Cr`}
               </p>
 
               <div className="flex md:flex-col gap-2 ">
