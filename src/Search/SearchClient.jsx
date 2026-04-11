@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CarFront } from "lucide-react";
 import BookSiteVisitModal from "../Properties/BookSiteVisitModal";
 import ContactSidebar from "../Properties/ContactSidebar";
 import BookSiteVisitCard from "../Properties/BookSiteVisitCard";
+import LeadCaptureModal from "../LeadCapture/LeadCaptureModal";
 import Image from "next/image";
 
 export default function SearchClient() {
@@ -18,21 +19,52 @@ export default function SearchClient() {
   const [readMore, setReadMore] = useState(false);
   const [openTour, setOpenTour] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
+  const [showDeveloperLead, setShowDeveloperLead] = useState(false);
 
   /* -------------------- SEARCH PARAMS -------------------- */
   const city = searchParams.get("city");
   const propertyType = searchParams.get("propertyType");
-  const builder = searchParams.get("builder");
+  const developerName =
+    searchParams.get("developer") || searchParams.get("builder") || "";
   const listingType = searchParams.get("listingType");
+
+  const developerLeadPrefix = useMemo(() => {
+    const parts = ["[Developer category — Get Details]"];
+    if (developerName) parts.push(`Developer: ${developerName}`);
+    if (city) parts.push(`City: ${city}`);
+    if (propertyType) parts.push(`Property type: ${propertyType}`);
+    return parts.join(" | ");
+  }, [developerName, city, propertyType]);
+
+  const developerInterestedContext = useMemo(
+    () =>
+      developerName
+        ? {
+            propertyId: null,
+            propertyTitle: `Developer: ${developerName}`,
+            propertyName: `Developer: ${developerName}`,
+            propertyLocation: city || null,
+          }
+        : {
+            propertyId: null,
+            propertyTitle: null,
+            propertyName: null,
+            propertyLocation: null,
+          },
+    [developerName, city],
+  );
 
   /* -------------------- DYNAMIC TITLE & DESCRIPTION -------------------- */
   const { title, description } = useMemo(() => {
     let titleText = "Properties Available";
     let descText = "Explore the best real estate options matching your search.";
 
-    if (builder && city) {
-      titleText = `Top Projects by ${builder} in ${city}`;
-      descText = `Explore premium residential projects by ${builder} in ${city}. Discover thoughtfully designed homes with world-class amenities and excellent connectivity.`;
+    if (developerName && city) {
+      titleText = `Top Projects by ${developerName} in ${city}`;
+      descText = `Explore premium residential projects by ${developerName} in ${city}. Discover thoughtfully designed homes with world-class amenities and excellent connectivity.`;
+    } else if (developerName) {
+      titleText = `Projects by ${developerName}`;
+      descText = `Browse verified listings from ${developerName}. Compare floor plans, pricing, and availability across locations.`;
     } else if (propertyType && city) {
       titleText = `${propertyType}s for Sale in ${city}`;
       descText = `Browse a wide range of ${propertyType.toLowerCase()}s available in ${city}. Compare prices, locations, amenities, and find the perfect home that suits your lifestyle.`;
@@ -45,7 +77,7 @@ export default function SearchClient() {
     }
 
     return { title: titleText, description: descText };
-  }, [city, propertyType, builder, listingType]);
+  }, [city, propertyType, developerName, listingType]);
 
   /* -------------------- API CALL -------------------- */
   useEffect(() => {
@@ -72,41 +104,97 @@ export default function SearchClient() {
     };
 
     fetchData();
-  }, [searchParams]);
+  }, [searchParams.toString()]);
+
+  const openDeveloperLead = useCallback(() => setShowDeveloperLead(true), []);
 
   /* -------------------- STATES -------------------- */
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center text-gray-500">
-        Loading properties...
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {developerName ? (
+          <DeveloperCategoryHero
+            developerName={developerName}
+            city={city}
+            onGetDetails={openDeveloperLead}
+          />
+        ) : null}
+        <div className="min-h-[40vh] flex items-center justify-center text-gray-500">
+          Loading properties...
+        </div>
+        <LeadCaptureModal
+          {...developerInterestedContext}
+          open={showDeveloperLead}
+          onClose={() => setShowDeveloperLead(false)}
+          title="Get project details"
+          subtitle="Share your details and our team will reach out with inventory, pricing, and offers."
+          messagePrefix={developerLeadPrefix}
+          submitLabel="Submit enquiry"
+        />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center text-red-500">
-        Something went wrong. Please try again.
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {developerName ? (
+          <DeveloperCategoryHero
+            developerName={developerName}
+            city={city}
+            onGetDetails={openDeveloperLead}
+          />
+        ) : null}
+        <div className="min-h-[40vh] flex items-center justify-center text-red-500">
+          Something went wrong. Please try again.
+        </div>
+        <LeadCaptureModal
+          {...developerInterestedContext}
+          open={showDeveloperLead}
+          onClose={() => setShowDeveloperLead(false)}
+          title="Get project details"
+          subtitle="Share your details and our team will reach out."
+          messagePrefix={developerLeadPrefix}
+          submitLabel="Submit enquiry"
+        />
       </div>
     );
   }
 
   if (!properties.length) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 ">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-2">
-          No properties match your search
-        </h2>
-        <p className="text-gray-500 max-w-md mb-6 text-lg">
-          Try adjusting your filters or searching with different keywords.
-        </p>
-        <button
-          onClick={() => router.push("/")}
-          className="px-6 py-3 rounded-lg bg-brickred text-white font-semibold hover:bg-ochre transition text-lg cursor-pointer"
-        >
-          Back to Search
-        </button>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {developerName ? (
+          <DeveloperCategoryHero
+            developerName={developerName}
+            city={city}
+            onGetDetails={openDeveloperLead}
+          />
+        ) : null}
+        <div className="min-h-[50vh] flex flex-col items-center justify-center text-center px-6">
+          <h2 className="text-3xl font-semibold text-gray-800 mb-2">
+            No properties match your search
+          </h2>
+          <p className="text-gray-500 max-w-md mb-6 text-lg">
+            Try adjusting your filters or searching with different keywords.
+          </p>
+          <button
+            onClick={() => router.push("/")}
+            className="px-6 py-3 rounded-lg bg-brickred text-white font-semibold hover:bg-ochre transition text-lg cursor-pointer"
+          >
+            Back to Search
+          </button>
+        </div>
+        <LeadCaptureModal
+          {...developerInterestedContext}
+          open={showDeveloperLead}
+          onClose={() => setShowDeveloperLead(false)}
+          title="Get project details"
+          subtitle="Share your details and our team will reach out."
+          messagePrefix={developerLeadPrefix}
+          submitLabel="Submit enquiry"
+        />
       </div>
     );
   }
@@ -117,6 +205,13 @@ export default function SearchClient() {
     <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
       {/*  SEARCH LANDING MESSAGE */}
       <div className="lg:col-span-8 space-y-4 mt-">
+        {developerName ? (
+          <DeveloperCategoryHero
+            developerName={developerName}
+            city={city}
+            onGetDetails={openDeveloperLead}
+          />
+        ) : null}
         <div className="bg-white border rounded-xl shadow-sm p-5">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
@@ -262,6 +357,42 @@ export default function SearchClient() {
         <ContactSidebar />
         <BookSiteVisitCard />
       </div> */}
+
+      <LeadCaptureModal
+        {...developerInterestedContext}
+        open={showDeveloperLead}
+        onClose={() => setShowDeveloperLead(false)}
+        title="Get project details"
+        subtitle="Enter your details and we will share brochures, payment plans, and availability."
+        messagePrefix={developerLeadPrefix}
+        submitLabel="Submit enquiry"
+      />
+    </div>
+  );
+}
+
+function DeveloperCategoryHero({ developerName, city, onGetDetails }) {
+  return (
+    <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-md bg-gradient-to-r from-[#1a2b4a] via-[#243a5c] to-brickred text-white">
+      <div className="px-6 py-8 md:px-10 md:py-10 md:flex md:items-center md:justify-between gap-6">
+        <div className="max-w-2xl">
+          <p className="text-xs font-semibold uppercase tracking-wider text-white/75 mb-2">
+            Developer
+          </p>
+          <h2 className="text-2xl md:text-3xl font-bold leading-tight">{developerName}</h2>
+          {city ? <p className="mt-2 text-base text-white/90">{city}</p> : null}
+          <p className="mt-4 text-sm text-white/85 leading-relaxed">
+            Request inventory, pricing, floor plans, and payment options. Our team will contact you with tailored project details.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onGetDetails}
+          className="mt-6 md:mt-0 shrink-0 bg-white text-brickred font-semibold px-8 py-3 rounded-xl shadow-md hover:bg-gray-100 transition w-full md:w-auto"
+        >
+          Get Details
+        </button>
+      </div>
     </div>
   );
 }

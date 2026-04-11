@@ -423,6 +423,8 @@ import ContactSidebar from "@/src/Properties/ContactSidebar";
 import BookSiteVisitCard from "@/src/Properties/BookSiteVisitCard";
 import SellerContactActions from "@/src/Properties/SellerContactActions";
 import LoginModal from "@/src/Auth/LoginModal";
+import LeadCaptureModal from "@/src/LeadCapture/LeadCaptureModal";
+import { downloadGalleryImages } from "@/src/utils/downloadGalleryImages";
 import toast from "react-hot-toast";
 
 /* ================= UTIL ================= */
@@ -893,7 +895,16 @@ function GallerySlider({ property }) {
   ].filter(Boolean);
 
   const [activeImage, setActiveImage] = useState(null);
+  const [showDownloadLead, setShowDownloadLead] = useState(false);
   const scrollContainer = useRef(null);
+
+  const galleryDownloadSlug =
+    (property?.propertyTitle || property?.title || property?.id || "property")
+      .toString()
+      .replace(/[^a-zA-Z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "gallery";
+
+  const galleryLeadPrefix = `[Gallery download] Property: ${property?.propertyTitle || property?.title || "Listing"} (id: ${property?.id || "unknown"})`;
 
   const slideBy = (direction) => {
     if (!scrollContainer.current) return;
@@ -915,6 +926,16 @@ function GallerySlider({ property }) {
   return (
     <>
       <Card title="Gallery">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <p className="text-sm text-gray-600">Swipe or use arrows to browse images.</p>
+          <button
+            type="button"
+            onClick={() => setShowDownloadLead(true)}
+            className="shrink-0 inline-flex items-center justify-center rounded-lg bg-brickred px-4 py-2 text-sm font-semibold text-white hover:bg-ochre transition"
+          >
+            Download Gallery
+          </button>
+        </div>
         <div className="relative">
           <button
             type="button"
@@ -957,6 +978,24 @@ function GallerySlider({ property }) {
           </button>
         </div>
       </Card>
+
+      <LeadCaptureModal
+        open={showDownloadLead}
+        onClose={() => setShowDownloadLead(false)}
+        title="Download property gallery"
+        subtitle="Submit the interested form to download the gallery images."
+        messagePrefix={galleryLeadPrefix}
+        submitLabel="Submit & download"
+        propertyId={property?.id ?? null}
+        propertyTitle={property?.propertyTitle || property?.title || null}
+        propertyName={property?.propertyTitle || property?.title || null}
+        propertyLocation={
+          [property?.locality, property?.city].filter(Boolean).join(", ") || null
+        }
+        onSuccess={() => {
+          downloadGalleryImages(galleryImages, galleryDownloadSlug);
+        }}
+      />
 
       {activeImage && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
