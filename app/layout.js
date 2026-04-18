@@ -1,6 +1,7 @@
 import { Cinzel, Lato } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/src/ConditionalLayout";
+import QueryProvider from "@/src/providers/QueryProvider";
 import { Toaster } from "react-hot-toast";
 import Script from "next/script";
 
@@ -51,7 +52,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
-        <ConditionalLayout>{children}</ConditionalLayout>
+        <QueryProvider>
+          <ConditionalLayout>{children}</ConditionalLayout>
+        </QueryProvider>
         <Toaster position="top-right" reverseOrder={false} />
       </body>
     </html>

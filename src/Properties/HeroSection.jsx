@@ -7,8 +7,9 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function HeroSection() {
+export default function HeroSection({ searchBasePath = "/search" } = {}) {
   const router = useRouter();
+  const actionLabel = "Find";
 
   // 🔍 Search states (MATCHES HOMEPAGE LOGIC)
   const [propertyType, setPropertyType] = useState("");
@@ -27,7 +28,7 @@ export default function HeroSection() {
     if (minPrice) params.append("minPrice", minPrice);
     if (maxPrice) params.append("maxPrice", maxPrice);
 
-    router.push(`/search?${params.toString()}`);
+    router.push(`${searchBasePath}?${params.toString()}`);
   };
 
   return (
@@ -143,7 +144,7 @@ export default function HeroSection() {
                   className="bg-brickred text-white rounded-xl flex items-center justify-center gap-2 px-6 py-3 hover:bg-ochre transition"
                 >
                   <Search className="w-5 h-5" />
-                  Find
+                  {actionLabel}
                 </button>
               </div>
             </div>

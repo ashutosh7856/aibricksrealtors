@@ -29,12 +29,11 @@
 
 "use client";
 
-import { useRef } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "@/src/Home/Navbar";
 import Footer from "@/src/Footer";
 import ClientLayout from "@/src/ClientLayout";
-import AuthModalController from "@/src/Auth/AuthModalController";
+import ContactModal from "@/src/Modal/ContactModal";
 import StickySectionNav from "./Developers/StickySectionNav";
 import PropertySectionNav from "./Properties/PropertySectionNav";
 
@@ -46,9 +45,7 @@ export default function ConditionalLayout({ children }) {
   const isDeveloperPage =
     pathname === "/developers" || pathname?.startsWith("/developers/");
 
-  const isPropertyPage = pathname.startsWith("/properties/");
-
-  const authModalRef = useRef(null);
+  const isPropertyPage = pathname?.startsWith("/properties/");
 
   // ❌ No layout for admin
   if (isAdminRoute) {
@@ -68,10 +65,10 @@ export default function ConditionalLayout({ children }) {
       ) : isDeveloperPage ? (
         <StickySectionNav />
       ) : (
-        <Navbar onLoginClick={() => authModalRef.current?.openLogin()} />
+        <Navbar />
       )}
 
-      <AuthModalController ref={authModalRef} />
+      <ContactModal />
 
       {children}
 

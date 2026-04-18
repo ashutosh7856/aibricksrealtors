@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Loader from "./Loader";
+import RouteProgress from "./RouteProgress";
 
 export default function ClientLayout({ children }) {
   const [loading, setLoading] = useState(true);
@@ -19,6 +20,7 @@ export default function ClientLayout({ children }) {
 
   return (
     <>
+      <RouteProgress />
       {loading && <Loader />}
       <div
         className={`transition-opacity duration-700 ${
