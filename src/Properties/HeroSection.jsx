@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 export default function HeroSection({ searchBasePath = "/search" } = {}) {
   const router = useRouter();
@@ -53,14 +52,6 @@ export default function HeroSection({ searchBasePath = "/search" } = {}) {
             help you find your dream home.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap gap-4 mb-10">
-            <Link href="/about">
-              <button className="bg-ochre text-white px-6 py-3 rounded-md shadow-md hover:bg-brickred transition">
-                Learn More
-              </button>
-            </Link>
-          </div>
 
           {/* ===== Search Box ===== */}
           <div className="bg-[#f8f8ff] border-2 border-ochre rounded-2xl p-4 md:p-6 shadow-sm">

@@ -4,11 +4,13 @@ import HeroSection from "@/src/Properties/HeroSection";
 import PropertyCard from "@/src/Properties/PropertyCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { headers } from "next/headers";
 import FAQSection from "@/src/FAQSection";
 import { propertyFaqs } from "@/data/faq";
+import { getCachedProperties } from "@/lib/data/properties";
 
 const ITEMS_PER_PAGE = 10;
+
+export const revalidate = 300;
 
 // async function getProperties() {
 //   try {
@@ -40,26 +42,8 @@ const ITEMS_PER_PAGE = 10;
 
 async function getProperties() {
   try {
-    const headersList = headers();
-
-    const host = headersList.get("x-forwarded-host") || headersList.get("host");
-
-    const protocol = headersList.get("x-forwarded-proto") || "https";
-
-    if (!host) {
-      throw new Error("Host header is missing");
-    }
-
-    const res = await fetch(`${protocol}://${host}/api/v1/properties`, {
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      console.error("API error:", res.status);
-      throw new Error("API response not OK");
-    }
-
-    return res.json();
+    const properties = await getCachedProperties({ activeStatus: "Yes" });
+    return { success: true, data: properties };
   } catch (error) {
     console.error("Error fetching properties:", error);
     throw new Error("Failed to load properties");

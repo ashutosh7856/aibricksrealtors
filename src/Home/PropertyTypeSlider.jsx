@@ -233,6 +233,8 @@ export default function PropertyTypeSlider() {
                 <img
                   src={type.image}
                   alt={type.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-[320px] sm:h-[360px] md:h-[400px] object-cover group-hover:scale-110 transition-transform duration-700"
                 />
 

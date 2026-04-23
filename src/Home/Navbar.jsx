@@ -5,56 +5,25 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function Navbar() {
+export default function Navbar({ initialBuilders = [], initialLocations = [] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showDevDropdown, setShowDevDropdown] = useState(false);
   const [showMobileDev, setShowMobileDev] = useState(false);
   const [showLocDropdown, setShowLocDropdown] = useState(false);
   const [showMobileLoc, setShowMobileLoc] = useState(false);
-  const [builders, setBuilders] = useState([]);
-  const [locations, setLocations] = useState([]);
+  const [builders, setBuilders] = useState(initialBuilders);
+  const [locations, setLocations] = useState(initialLocations);
 
   const router = useRouter();
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch("/api/v1/properties");
-        const data = await res.json();
-
-        const uniqueBuilders = [
-          ...new Set(
-            data.data?.map((item) => item.builderName?.trim()).filter(Boolean),
-          ),
-        ];
-        setBuilders(uniqueBuilders);
-
-        const cityMap = {};
-        data.data?.forEach((item) => {
-          const city = item.city?.trim();
-          const locality = item.locality?.trim();
-
-          if (!city || !locality) return;
-
-          if (!cityMap[city]) cityMap[city] = new Set();
-          cityMap[city].add(locality);
-        });
-
-        const formatted = Object.keys(cityMap).map((city) => ({
-          city,
-          localities: Array.from(cityMap[city]),
-        }));
-
-        setLocations(formatted);
-      } catch (error) {
-        console.error("Fetch error:", error);
-      }
-    }
-
-    fetchData();
-  }, []);
+    ["/", "/about", "/properties", "/contact", "/locations"].forEach((href) => {
+      router.prefetch(href);
+    });
+  }, [router]);
 
   const toSlug = (name) => name.toLowerCase().replace(/\s+/g, "-");
+  const cityToSlug = (name) => name.toLowerCase().replace(/\s+/g, "-");
 
   return (
     <>
@@ -96,13 +65,13 @@ export default function Navbar() {
                       </p>
                       <div className="max-h-72 overflow-y-auto no-scrollbar space-y-1 pr-1">
                         {builders.map((builder, index) => (
-                          <button
+                          <Link
                             key={index}
-                            onClick={() => router.push(`/developers/${toSlug(builder)}`)}
+                            href={`/developers/${typeof builder === "object" ? builder.slug : toSlug(builder)}`}
                             className="block w-full text-left px-4 py-2 rounded-md hover:bg-gray-100 cursor-pointer"
                           >
-                            {builder}
-                          </button>
+                            {typeof builder === "object" ? builder.name : builder}
+                          </Link>
                         ))}
                       </div>
                     </div>
@@ -125,13 +94,13 @@ export default function Navbar() {
                   <div className="absolute top-full left-0 w-full h-3" />
                   <div className="absolute top-full left-0 w-64 max-h-80 overflow-y-auto bg-white rounded-xl shadow-xl border z-50 p-4 space-y-4">
                     {locations.map((item, index) => (
-                      <button
+                      <Link
                         key={index}
-                        onClick={() => router.push(`/locations/${toSlug(item.city)}`)}
+                        href={`/locations/${item.slug || cityToSlug(item.city)}`}
                         className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-darkgray cursor-pointer"
                       >
                         {item.city}
-                      </button>
+                      </Link>
                     ))}
                   </div>
                 </>
@@ -196,16 +165,14 @@ export default function Navbar() {
               <div className="mt-2 ml-2 border-l pl-3 space-y-3">
                 <div className="max-h-44 overflow-y-auto no-scrollbar pr-2 space-y-1">
                   {builders.map((builder, index) => (
-                    <button
+                    <Link
                       key={index}
-                      onClick={() => {
-                        setIsOpen(false);
-                        router.push(`/developers/${toSlug(builder)}`);
-                      }}
+                      href={`/developers/${typeof builder === "object" ? builder.slug : toSlug(builder)}`}
+                      onClick={() => setIsOpen(false)}
                       className="block w-full text-left py-1 cursor-pointer"
                     >
-                      {builder}
-                    </button>
+                      {typeof builder === "object" ? builder.name : builder}
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -227,16 +194,14 @@ export default function Navbar() {
             {showMobileLoc && (
               <div className="mt-2 ml-2 border-l pl-3 space-y-2">
                 {locations.map((item, index) => (
-                  <button
+                  <Link
                     key={index}
-                    onClick={() => {
-                      setIsOpen(false);
-                      router.push(`/locations/${toSlug(item.city)}`);
-                    }}
+                    href={`/locations/${item.slug || cityToSlug(item.city)}`}
+                    onClick={() => setIsOpen(false)}
                     className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-darkgray cursor-pointer"
                   >
                     {item.city}
-                  </button>
+                  </Link>
                 ))}
               </div>
             )}

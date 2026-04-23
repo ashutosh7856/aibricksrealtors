@@ -304,6 +304,8 @@ function MasterPlan({ property }) {
         }))
       : [];
   const [selectedFloorPlan, setSelectedFloorPlan] = useState(null);
+  const [showPriceBreakupLead, setShowPriceBreakupLead] = useState(false);
+  const [priceBreakupPlan, setPriceBreakupPlan] = useState(null);
   const formatPlanPrice = (price) => {
     const numericPrice = Number(price);
     if (!Number.isFinite(numericPrice) || numericPrice <= 0)
@@ -312,6 +314,7 @@ function MasterPlan({ property }) {
   };
 
   return (
+    <>
     <Card title="Master & Floor Plan">
       {floorPlans.length === 0 ? (
         <div className="text-gray-500">Floor Plan Not Available</div>
@@ -356,7 +359,7 @@ function MasterPlan({ property }) {
                 </p>
                 <button
                   type="button"
-                  onClick={() => setSelectedFloorPlan(plan)}
+                  onClick={() => { setPriceBreakupPlan(plan); setShowPriceBreakupLead(true); }}
                   className="mt-3 w-full bg-[#0f2f5f] hover:bg-[#123a73] text-white text-sm font-medium py-2 rounded-md"
                 >
                   Price Breakup
@@ -400,6 +403,20 @@ function MasterPlan({ property }) {
         </div>
       )}
     </Card>
+
+    <LeadCaptureModal
+      open={showPriceBreakupLead}
+      onClose={() => { setShowPriceBreakupLead(false); setPriceBreakupPlan(null); }}
+      title="Get Price Breakup"
+      subtitle={priceBreakupPlan ? `Request detailed price breakdown for ${priceBreakupPlan.name || "this unit"}` : "Fill in your details to receive the full price breakdown."}
+      messagePrefix={`[Price Breakup Request] Property: ${property?.propertyTitle || ""} | Unit: ${priceBreakupPlan?.name || ""}`}
+      submitLabel="Get Price Breakup"
+      propertyId={property?.id ?? null}
+      propertyTitle={property?.propertyTitle || property?.title || null}
+      propertyName={property?.propertyTitle || property?.title || null}
+      propertyLocation={[property?.locality, property?.city].filter(Boolean).join(", ") || null}
+    />
+    </>
   );
 }
 
