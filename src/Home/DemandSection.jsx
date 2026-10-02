@@ -85,10 +85,12 @@ import { useEffect, useState, useCallback } from "react";
 
 const FALLBACK_IMAGE = "/home/indemand/4.jpg";
 
-export default function DemandSection() {
-  const [areaCards, setAreaCards] = useState([]);
+export default function DemandSection({ initialCards = [] }) {
+  const [areaCards, setAreaCards] = useState(initialCards);
 
   useEffect(() => {
+    if (initialCards.length) return undefined;
+
     const fetchLocalities = async () => {
       try {
         const res = await fetch("/api/v1/properties/search?limit=100", {
@@ -155,7 +157,7 @@ export default function DemandSection() {
     };
 
     fetchLocalities();
-  }, []);
+  }, [initialCards.length]);
 
   if (!areaCards.length) return null;
 

@@ -1,75 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
 import { motion } from "framer-motion";
 import { LogIn, Mail, Lock, Sparkles, ArrowRight } from "lucide-react";
-import { authAPI } from "@/src/admin/utils/api";
 import "@/src/admin/styles/admin.css";
+import { loginAction } from "./actions";
 
 export default function AdminLogin() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    // Check if already logged in - only check once
-    let mounted = true;
-    const checkAuth = async () => {
-      try {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
-        if (!token) {
-          // No token, stay on login page
-          return;
-        }
-        
-        const response = await authAPI.getCurrentUser();
-        if (mounted && response.success && response.data?.role === "admin") {
-          router.replace("/admin");
-        }
-      } catch (error) {
-        // Not logged in, stay on login page
-        // Clear invalid token
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('admin_token');
-        }
-      }
-    };
-    
-    checkAuth();
-    
-    return () => {
-      mounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    try {
-      const response = await authAPI.login(email, password);
-      
-      if (response.success) {
-        // Check if user is admin
-        if (response.data?.user?.role === "admin") {
-          router.push("/admin");
-        } else {
-          setError("Access denied. Admin privileges required.");
-          authAPI.logout();
-        }
-      } else {
-        setError(response.error || response.message || "Login failed");
-      }
-    } catch (error) {
-      setError(error.message || "An error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [state, formAction, isPending] = useActionState(loginAction, { error: "" });
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: "#F7F5FA" }}>
@@ -92,10 +29,10 @@ export default function AdminLogin() {
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
-            {error && (
+          <form action={formAction} className="p-8 space-y-6">
+            {state.error && (
               <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
-                {error}
+                {state.error}
               </div>
             )}
 
@@ -108,8 +45,7 @@ export default function AdminLogin() {
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10 pointer-events-none" />
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  name="email"
                   required
                   className="admin-input admin-input-with-icon py-3"
                   placeholder="admin@example.com"
@@ -126,8 +62,7 @@ export default function AdminLogin() {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10 pointer-events-none" />
                 <input
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  name="password"
                   required
                   className="admin-input admin-input-with-icon py-3"
                   placeholder="Enter your password"
@@ -138,10 +73,10 @@ export default function AdminLogin() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isPending}
               className="w-full admin-btn-primary py-3.5 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
+              {isPending ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Logging in...</span>

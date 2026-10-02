@@ -64,6 +64,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import HeroSection from "@/src/Home/HeroSection";
 import { homeFaqs } from "@/data/faq";
+import { getHomeData } from "@/lib/data/home";
 
 const TrendingProjectsClient = dynamic(() => import("@/src/Home/TrendingProjectsClient"));
 const UpcomingProjects = dynamic(() => import("@/src/Home/UpcomingProjects"));
@@ -169,7 +170,9 @@ const faqSchema = {
   ],
 };
 
-export default function Home() {
+export default async function Home() {
+  const { trending, demand, upcoming } = await getHomeData();
+
   return (
     <>
       {/* Organization Schema */}
@@ -190,11 +193,11 @@ export default function Home() {
 
       <main className="bg-background">
         <HeroSection />
-        <TrendingProjectsClient />
-        <UpcomingProjects />
+        <TrendingProjectsClient initialProperties={trending} />
+        <UpcomingProjects initialProjects={upcoming} />
         <PropertyTypeSlider />
         <LogoSlider />
-        <DemandSection />
+        <DemandSection initialCards={demand} />
         <Cta />
         <EasyForYou />
         <FAQSection title="Frequently Asked Questions" faqs={homeFaqs} />

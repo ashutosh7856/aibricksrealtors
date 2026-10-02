@@ -148,7 +148,7 @@ export const authAPI = {
 // Properties APIs
 export const propertiesAPI = {
   getAll: async (params = {}) => {
-    const queryString = new URLSearchParams(params).toString();
+    const queryString = new URLSearchParams({ includeTotal: 'false', ...params }).toString();
     return await apiRequest(`/v1/properties?${queryString}`);
   },
 

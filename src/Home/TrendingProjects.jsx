@@ -110,13 +110,15 @@ const PropertyCard = memo(function PropertyCard({ property, onEnquire }) {
 });
 
 /* ---------------- MAIN COMPONENT ---------------- */
-export default function TrendingProjects() {
-  const [properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function TrendingProjects({ initialProperties = [] }) {
+  const [properties, setProperties] = useState(initialProperties);
+  const [loading, setLoading] = useState(initialProperties.length === 0);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
+    if (initialProperties.length) return undefined;
+
     const fetchProperties = async () => {
       try {
         const res = await fetch(API_URL, { cache: "no-store" });
@@ -161,7 +163,7 @@ export default function TrendingProjects() {
     };
 
     fetchProperties();
-  }, []);
+  }, [initialProperties.length]);
 
   const openEnquiry = useCallback((property) => {
     setSelectedProperty(property);

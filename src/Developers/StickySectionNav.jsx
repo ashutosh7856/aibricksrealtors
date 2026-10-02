@@ -22,7 +22,6 @@ export default function StickySectionNav() {
   const [active, setActive] = useState("about");
   const [isOpen, setIsOpen] = useState(false);
   const [developerName, setDeveloperName] = useState("AI BRICKS");
-  const [developerLogo, setDeveloperLogo] = useState(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -45,15 +44,6 @@ export default function StickySectionNav() {
 
     if (slug) {
       setDeveloperName(slugToName(slug));
-      fetch(`/api/v1/developers/${slug}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.success && data.data) {
-            if (data.data.name) setDeveloperName(data.data.name);
-            if (data.data.logo) setDeveloperLogo(data.data.logo);
-          }
-        })
-        .catch(() => {});
     }
   }, [pathname]);
 
@@ -98,15 +88,7 @@ export default function StickySectionNav() {
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-4 md:py-6 flex justify-between items-center">
           {/* LOGO */}
           <div className="flex min-w-0 max-w-[calc(100%-3.5rem)] items-center gap-3 text-base sm:text-lg md:text-xl font-bold text-[var(--color-darkgray)]">
-            {developerLogo ? (
-              <img
-                src={developerLogo}
-                alt={developerName}
-                className="h-10 w-24 sm:h-12 sm:w-28 md:h-16 md:w-32 object-contain"
-              />
-            ) : (
-              <span className="truncate">{developerName}</span>
-            )}
+            <span className="truncate">{developerName}</span>
           </div>
 
           {/* DESKTOP MENU */}

@@ -72,7 +72,8 @@ export default function Sidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await fetch("/api/v1/auth/logout", { method: "POST" });
     authAPI.logout();
     window.location.href = "/admin/login";
   };

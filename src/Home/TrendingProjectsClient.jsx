@@ -2,10 +2,10 @@
 import React from "react";
 import TrendingProjects from "./TrendingProjects";
 
-const TrendingProjectsClient = () => {
+const TrendingProjectsClient = ({ initialProperties = [] }) => {
   return (
     <div>
-      <TrendingProjects />
+      <TrendingProjects initialProperties={initialProperties} />
     </div>
   );
 };

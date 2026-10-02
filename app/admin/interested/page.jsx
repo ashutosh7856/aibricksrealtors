@@ -152,8 +152,38 @@ export default function InterestedPage() {
         </div>
       ) : (
         <div className="admin-card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="admin-table">
+          <div className="md:hidden divide-y divide-gray-100">
+            {filteredInterested.map((item) => (
+              <article key={item.id} className="p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="w-10 h-10 shrink-0 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                      {item.name?.[0] || "I"}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="truncate font-semibold text-gray-800">{item.name || "Unknown"}</h3>
+                      <p className="truncate text-sm text-gray-500">{item.email || "No email"}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { setSelectedItem(item); setShowModal(true); }}
+                    className="shrink-0 text-sm font-semibold text-purple-600"
+                  >
+                    Details
+                  </button>
+                </div>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                  <div className="min-w-0"><dt className="text-gray-400">Phone</dt><dd className="truncate text-gray-700">{item.phone || "N/A"}</dd></div>
+                  <div className="min-w-0"><dt className="text-gray-400">Budget</dt><dd className="truncate text-gray-700">{item.budgetRange || "N/A"}</dd></div>
+                  <div className="col-span-2 min-w-0"><dt className="text-gray-400">Property</dt><dd className="truncate text-gray-700">{item.propertyTitle || item.propertyName || item.propertyId || "N/A"}</dd></div>
+                  <div className="col-span-2 min-w-0"><dt className="text-gray-400">Submitted</dt><dd className="truncate text-gray-500">{formatDate(item.createdAt)}</dd></div>
+                </dl>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden md:block overflow-x-auto">
+            <table className="admin-table min-w-[920px] w-full">
               <thead>
                 <tr>
                   <th>Name</th>

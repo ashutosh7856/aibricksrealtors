@@ -14,20 +14,22 @@ const initialProjects = [
   { name: "L&T Hinjewadi", city: "Pune", image: "/home/upcoming/L&T-Hinjewadi.jpg", projectLabel: "Upcoming project", launchStatus: "Ready for launch" },
 ];
 
-export default function UpcomingProjects() {
+export default function UpcomingProjects({ initialProjects: serverProjects = [] }) {
   const [open, setOpen] = useState(false);
-  const [projects, setProjects] = useState(initialProjects);
+  const [projects, setProjects] = useState(serverProjects.length ? serverProjects : initialProjects);
   const trackRef = useRef(null);
   const scroll = (direction) => trackRef.current?.scrollBy({ left: direction * Math.min(trackRef.current.clientWidth, 390), behavior: "smooth" });
 
   useEffect(() => {
+    if (serverProjects.length) return undefined;
+
     fetch('/api/v1/upcoming-projects?activeOnly=true')
       .then((response) => response.ok ? response.json() : Promise.reject())
       .then((result) => {
         if (Array.isArray(result.data) && result.data.length > 0) setProjects(result.data);
       })
       .catch(() => {});
-  }, []);
+  }, [serverProjects.length]);
 
   return (
     <section className="pt-16 bg-[#f8f8f8] text-center w-full">

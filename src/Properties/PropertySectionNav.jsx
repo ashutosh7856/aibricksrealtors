@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Menu, X, Home, ChevronLeft } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 
 const sections = [
   { id: "overview", label: "OVERVIEW" },
@@ -20,21 +19,12 @@ export default function PropertySectionNav() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
-  const { id } = useParams(); // ✅ get property id
-
-  // ✅ FETCH PROPERTY TITLE WITH TANSTACK QUERY
-  const { data: property } = useQuery({
-    queryKey: ["property", id],
-    queryFn: async () => {
-      const res = await fetch(`/api/v1/properties/${id}`);
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
-      return data?.data || null;
-    },
-    enabled: !!id,
-  });
-
-  const propertyTitle = property?.propertyTitle || "Property Details";
+  const pathname = usePathname();
+  const propertySlug = pathname?.split("/").filter(Boolean).pop() || "property-details";
+  const propertyTitle = propertySlug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 
   // ✅ SCROLL SPY
   useEffect(() => {

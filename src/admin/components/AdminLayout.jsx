@@ -19,15 +19,6 @@ export default function AdminLayout({ children }) {
     }
     
     const checkAuth = async () => {
-      // Check if token exists before making API call
-      const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
-      if (!token) {
-        authChecked.current = true;
-        setIsLoading(false);
-        router.replace("/admin/login");
-        return;
-      }
-
       try {
         authChecked.current = true;
         const response = await authAPI.getCurrentUser();

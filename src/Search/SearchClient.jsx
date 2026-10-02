@@ -13,7 +13,7 @@ import Image from "next/image";
 import { formatPropertyPrice } from "../../lib/utils/formatPropertyPrice";
 import { getPropertyPath } from "@/lib/utils/propertySlug";
 
-export default function SearchClient() {
+export default function SearchClient({ initialProperties = [], initialSearchKey = "" }) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -110,6 +110,10 @@ export default function SearchClient() {
   } = useQuery({
     queryKey: ["properties", searchParams.toString()],
     placeholderData: (previousData) => previousData,
+    initialData: () => (
+      searchParams.toString() === initialSearchKey ? initialProperties : undefined
+    ),
+    staleTime: 30_000,
     queryFn: async () => {
       const res = await fetch(
         `/api/v1/properties/search?${searchParams.toString()}`,

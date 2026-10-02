@@ -29,24 +29,23 @@ export async function GET(req) {
       );
     }
 
-    // Fetch all data in parallel
-    const [propertiesCount, contactsCount, visitsCount, interestedCount, propertiesData, contactsData, visitsData, interestedData] =
+    // Keep the dashboard read bounded. Counts are aggregation reads; the chart
+    // only needs recent records, not every document in each collection.
+    const [propertiesCount, contactsCount, visitsCount, interestedCount, propertiesData, contactsData, visitsData] =
       await Promise.all([
         propertyModel.getCount(),
         contactModel.getCount(),
         scheduleVisitModel.getCount(),
         interestedModel.getCount(),
-        propertyModel.getAll({}), // Get all properties (no limit in Property model)
-        contactModel.getAll(1000),
-        scheduleVisitModel.getAll(1000),
-        interestedModel.getAll(1000),
+        propertyModel.getAll({ limit: 100 }),
+        contactModel.getAll(100),
+        scheduleVisitModel.getAll(100),
       ]);
 
     // Convert timestamps for all data
     const propertiesWithDates = (propertiesData || []).map(property => convertTimestamps(property));
     const contactsWithDates = (contactsData || []).map(contact => convertTimestamps(contact));
     const visitsWithDates = (visitsData || []).map(visit => convertTimestamps(visit));
-    const interestedWithDates = (interestedData || []).map(item => convertTimestamps(item));
 
     // Helper function to group data by date
     const groupByDate = (data, dateField = 'createdAt') => {
@@ -115,7 +114,7 @@ export async function GET(req) {
     // Calculate traffic sources (pie chart data)
     const totalContacts = contactsWithDates.length;
     const totalVisits = visitsWithDates.length;
-    const totalInterested = interestedWithDates.length;
+    const totalInterested = interestedCount;
     const total = totalContacts + totalVisits + totalInterested;
 
     const trafficSources = [

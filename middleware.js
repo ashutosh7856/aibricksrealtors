@@ -6,6 +6,15 @@ export function middleware(request) {
   const hostname = request.headers.get('host') || '';
   const url = request.nextUrl;
 
+  if (url.pathname.startsWith('/admin') && url.pathname !== '/admin/login') {
+    const session = request.cookies.get('admin_session')?.value;
+    if (!session) {
+      const loginUrl = new URL('/admin/login', request.url);
+      loginUrl.searchParams.set('next', url.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   // Skip rewrites for API, static assets, admin, and location pages
   // /locations is excluded so that city-subdomain fallback redirects land correctly
   if (

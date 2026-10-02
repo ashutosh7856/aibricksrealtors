@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '@/lib/config';
 import logger from '@/lib/logger';
+import { cookies } from 'next/headers';
+import { SESSION_COOKIE } from '@/lib/auth/session';
 
 function generateToken(id) {
   return jwt.sign({ id }, config.jwt.secret, {
@@ -15,9 +17,6 @@ export async function POST(req) {
   try {
     const body = await req.json();
     const { email, password } = body;
-
-
-    await userModel.getAll();
 
     // Validate email and password
     if (!email || !password) {
@@ -70,6 +69,14 @@ export async function POST(req) {
 
     // Generate token
     const token = generateToken(user.id);
+    const cookieStore = await cookies();
+    cookieStore.set(SESSION_COOKIE, token, {
+      httpOnly: true,
+      secure: config.env === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7,
+    });
 
     return NextResponse.json({
       success: true,
